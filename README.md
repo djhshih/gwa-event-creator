@@ -28,7 +28,7 @@ In Gmail,
 More robust parsing to identify event details.
 
 
-1: https://developers.google.com/workspace/add-ons/quickstart/cats-quickstart#common.gs
-2: https://script.google.com
-3: https://github.com/google/clasp
+[1]: https://developers.google.com/workspace/add-ons/quickstart/cats-quickstart#common.gs
+[2]: https://script.google.com
+[3]: https://github.com/google/clasp
 
