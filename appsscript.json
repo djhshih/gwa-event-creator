@@ -1,0 +1,32 @@
+{
+  "timeZone": "Asia/Hong_Kong",
+  "dependencies": {
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/calendar.addons.execute",
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/gmail.addons.execute",
+    "https://www.googleapis.com/auth/gmail.addons.current.message.readonly",
+    "https://www.googleapis.com/auth/script.locale"],
+  "runtimeVersion": "V8",
+  "addOns": {
+    "common": {
+      "name": "Event",
+      "useLocaleFromApp": true,
+      "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/event_grey600_48dp.png",
+      "homepageTrigger": {
+        "runFunction": "onHomepage",
+        "enabled": true
+      }
+    },
+    "gmail": {
+      "contextualTriggers": [{
+        "unconditional": {
+        },
+        "onTriggerFunction": "onGmailMessage"
+      }]
+    }
+  }
+}
+
