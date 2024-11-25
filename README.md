@@ -4,13 +4,11 @@ A Google Workspace add-on for creating Google calendar events.
 
 ## Installation
 
-Set up an Apps Script project by following this (guide)[1].
+Set up an Apps Script project by following this [guide][1].
 
 Update the time zone in `appsscript.json`.
 
-Then, you can push this (apps script)[script.google.com] project with
-(clasp)[https://github.com/google/clasp] by
-
+Then, you can push this [apps script][2] project with [clasp][3] by
 ```
 clasp push
 ```
@@ -31,4 +29,6 @@ More robust parsing to identify event details.
 
 
 1: https://developers.google.com/workspace/add-ons/quickstart/cats-quickstart#common.gs
+2: https://script.google.com
+3: https://github.com/google/clasp
 
