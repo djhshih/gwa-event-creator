@@ -14,7 +14,7 @@ function onHomepage(e) {
 }
 
 /**
- * Callback for Creating a card to add an event
+ * Callback for creating a card to add an event
  * @return {CardService.Card}
  */
 function createCard(title, date, timeZone, startTime, endTime, location, description) {
