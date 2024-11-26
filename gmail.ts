@@ -131,7 +131,7 @@ function parseTimeInterval(time: string): Interval {
 
 	// normalize format of times
 
-	var suffix = /a|p.?m.?/i;
+	var suffix = /(a|p).?m.?/i;
 
 	// infer am/pm of start time if it is missing
 	if (startTime.search(suffix) == -1) {
@@ -175,7 +175,7 @@ function normalizeTime(time: string) {
 	var i;
 
 	// Insert space between time and am/pm suffix
-	i = time.search(/a|p.?m.?/i);
+	i = time.search(/(a|p).?m.?/i);
 	if (i > 0) {
 		if (time[i - 1] != ' ') {
 			// insert space
@@ -237,7 +237,7 @@ function onGmailMessage(e) {
 	var date = parsePrefixedToken(body, /date\s*:/i, /\s*[0-9A-Za-z ,./]+/i);
 	var time = parsePrefixedToken(body,
 		/time\s*:/i,
-		/\s*[0-9]+(:[0-9]+)?\s*(a|p\.?m\.?)?\s*(-|–|(to))?\s*[0-9]+(:[0-9]+)?\s*(a|p\.?m\.?)?/i
+		/\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?\s*(-|–|(to))?\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?/i
 	);
 
 	var location = parsePrefixedToken(body, /venue\s*:/i, /\s*.+/);
