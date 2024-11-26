@@ -54,30 +54,30 @@ function createCard(title, date, timeZone, startTime, endTime, location, descrip
 	// Create a button for adding event
 	// Note: Action parameter keys and values must be strings.
 	var action = CardService.newAction()
-			.setFunctionName('doAddEvent')
-			.setParameters({description: description});
+		.setFunctionName('doAddEvent')
+		.setParameters({description: description});
 	var addButton = CardService.newTextButton()
-			.setText('Add')
-			.setOnClickAction(action)
-			.setTextButtonStyle(CardService.TextButtonStyle.FILLED);
+		.setText('Add')
+		.setOnClickAction(action)
+		.setTextButtonStyle(CardService.TextButtonStyle.FILLED);
 
 	// Assemble the widgets
 	var section = CardService.newCardSection()
-			.addWidget(titleText)
-			.addWidget(dateText)
-			.addWidget(timeZoneText)
-			.addWidget(startText)
-			.addWidget(endText)
-			.addWidget(locationText)
-			.addWidget(descriptionText);
+		.addWidget(titleText)
+		.addWidget(dateText)
+		.addWidget(timeZoneText)
+		.addWidget(startText)
+		.addWidget(endText)
+		.addWidget(locationText)
+		.addWidget(descriptionText);
 
 	// Add button to footer
 	var footer = CardService.newFixedFooter()
 		.setPrimaryButton(addButton);
 
 	var builder = CardService.newCardBuilder()
-			.addSection(section)
-			.setFixedFooter(footer);
+		.addSection(section)
+		.setFixedFooter(footer);
 
 	// Create the header shown when the card is minimized,
 	// but only when this card is a contextual card. Peek headers
