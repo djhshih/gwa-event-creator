@@ -8,8 +8,9 @@ function onHomepage(e) {
 	var section = CardService.newCardSection()
 		.addWidget(introText);
 	var card = CardService.newCardBuilder()
-		.addSection(section);
-	return card.build();
+		.addSection(section)
+		.build();
+	return card;
 }
 
 /**
@@ -55,14 +56,12 @@ function createCard(title, date, timeZone, startTime, endTime, location, descrip
 	var action = CardService.newAction()
 			.setFunctionName('doAddEvent')
 			.setParameters({description: description});
-	var button = CardService.newTextButton()
+	var addButton = CardService.newTextButton()
 			.setText('Add')
 			.setOnClickAction(action)
 			.setTextButtonStyle(CardService.TextButtonStyle.FILLED);
-	var buttonSet = CardService.newButtonSet()
-			.addButton(button);
 
-	// Assemble the widgets and return the card
+	// Assemble the widgets
 	var section = CardService.newCardSection()
 			.addWidget(titleText)
 			.addWidget(dateText)
@@ -70,10 +69,15 @@ function createCard(title, date, timeZone, startTime, endTime, location, descrip
 			.addWidget(startText)
 			.addWidget(endText)
 			.addWidget(locationText)
-			.addWidget(buttonSet)
 			.addWidget(descriptionText);
-	var card = CardService.newCardBuilder()
-			.addSection(section);
+
+	// Add button to footer
+	var footer = CardService.newFixedFooter()
+		.setPrimaryButton(addButton);
+
+	var builder = CardService.newCardBuilder()
+			.addSection(section)
+			.setFixedFooter(footer);
 
 	// Create the header shown when the card is minimized,
 	// but only when this card is a contextual card. Peek headers
@@ -81,9 +85,9 @@ function createCard(title, date, timeZone, startTime, endTime, location, descrip
 	var peekHeader = CardService.newCardHeader()
 		.setTitle('Event')
 		.setSubtitle(title);
-	card.setPeekCardHeader(peekHeader)
+	builder.setPeekCardHeader(peekHeader)
 
-	return card.build();
+	return builder.build();
 }
 
 function combineDateTime(date, time) {
