@@ -31,7 +31,7 @@ function createCard(e: CalendarEvent) {
 	var timeZoneText = CardService.newTextInput()
 		.setFieldName('timeZone')
 		.setTitle('Time Zone')
-		.setValue(e.timeZone.id);
+		.setValue(e.timeZone);
 
 	var startText = CardService.newTextInput()
 		.setFieldName('startTime')
@@ -101,9 +101,9 @@ function doAddEvent(e) {
 	var title = e.formInput.title;
 	var location = e.formInput.location;
 
-	var timeZone = e.formInput.timeZone;
+	var date = Utilities.parseDate(e.formInput.date, "GMT", "d MMM yyyy");
 
-	var date = Utilities.parseDate(e.formInput.date, timeZone, "d MMM yyyy");
+	var timeZone = e.formInput.timeZone;
 	var startTime = combineDateTime(
 		date, Utilities.parseDate(e.formInput.startTime, timeZone, "h:mm a")
 	);

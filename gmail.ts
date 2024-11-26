@@ -1,7 +1,7 @@
 interface CalendarEvent {
 	title: string,
 	date: string,
-	timeZone,
+	timeZone: string,
 	startTime: string,
 	endTime: string,
 	location: string,
@@ -52,7 +52,7 @@ function onGmailMessage(e) {
 	var endTime = '';
 	var location = '';
 	var description = '';
-	var timeZone = e.userTimezone;
+	var timeZone = CalendarApp.getTimeZone();
 
 	var i = body.search(/title:/i);
 	if (i != -1) {
