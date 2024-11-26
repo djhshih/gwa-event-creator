@@ -24,12 +24,35 @@ function newCalendarEvent(
 	};
 }
 
-function parseToken(s: string, prefix: RegExp, prefixEnd: string, tokenEnd: string) {
+/**
+ * Return string after eating token in string.
+ **/
+function eatToken(s: string, token: RegExp, tokenEnd: string) {
+	var i = s.search(token);
+	if (i == -1) {
+		return s;
+	}
+	var end = endOf(s, tokenEnd, i);
+	return s.substring(end);
+}
+
+/**
+ * Return parsed token after prefix in string.
+ **/
+function parseToken(s: string, prefix: RegExp, prefixEnd: string, token: RegExp, tokenEnd: string) {
 	var i = s.search(prefix);
 	if (i == -1) {
 		return '';
 	}
-	var start = s.indexOf(prefixEnd, i + 1) + 1;
+	var j = s.indexOf(prefixEnd, i + 1) + 1;
+	if (j == -1) {
+		return '';
+	}
+	var start = s.substring(j).search(token);
+	if (start == -1) {
+		return '';
+	}
+	start += j;
 	var end = endOf(s, tokenEnd, start);
 	return s.substring(start, end).trim();
 }
@@ -47,29 +70,33 @@ function onGmailMessage(e) {
 
 	var message = GmailApp.getMessageById(messageId);
 
-
-	var body = message.getPlainBody();
+	// Get message subject
+	// stripping 'Re:', 'Fw:', or similar prefix
+	// and anything enclosed in []
+	var subject = message.getSubject()
+			.replace(/^(re)|(fwd?)\:\s*/i, '')
+			.replace(/^\[.*?\]\s*/, '');
 
 	var timeZone = CalendarApp.getTimeZone();
 
-	var title = parseToken(body, /title:/i, ':', '\n');
+	var body = message.getPlainBody();
+
+	// Remove possible email header
+	body = eatToken(body, /Subject: /, '\n');
+
+	var title = parseToken(body, /title\s*:/i, ':', /\w+/, '\n');
 	if (title == '') {
-		// Use message subject as tentative title,
-		// stripping 'Re:', 'Fw:', or similar prefix
-		// and anything enclosed in []
-		title = message.getSubject()
-			.replace(/^(re)|(fwd?)\:\s*/i, '')
-			.replace(/^\[.*?\]\s*/, '');
+		title = subject;
 	}
 
 	// remove any parenthesized value (e.g. day of week)
-	var date = parseToken(body, /date:/i, ':', '\n')
+	var date = parseToken(body, /date\s*:/i, ':', /\w+/, '\n')
 		.replace(/\(.*\)/, '');
-	var time = parseToken(body, /time:/i, ':', '\n');
+	var time = parseToken(body, /time\s*:/i, ':', /[0-9]+(:[0-9]+)?\s*(a|pm)?/, '\n');
 
-	var location = parseToken(body, /venue:/i, ':', '\n');
+	var location = parseToken(body, /venue\s*:/i, ':', /\w+/, '\n');
 	if (location == '') {
-		location = parseToken(body, /location:/i, ':', '\n');
+		location = parseToken(body, /location\s*:/i, ':', /\w+/, '\n');
 	}
 
 	var description = '';
@@ -104,10 +131,12 @@ function onGmailMessage(e) {
 		startTime = time;
 	}
 	
-	// infer am/pm for start time if it is missing
+	// infer am/pm of start time if it is missing
 	if (startTime.search(/a|pm/) == -1) {
 		j = endTime.search(/a|pm/)
-		startTime += ' ' + endTime.substring(j);
+		if (j != -1) {
+			startTime += ' ' + endTime.substring(j);
+		}
 	}
 
 	return createCard(
