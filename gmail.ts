@@ -61,7 +61,7 @@ function parseTimeInterval(time: string): Interval {
 
 	// Utilities.parseDate cannot handle 'a.m.' and 'p.m.',
 	// so remove the '.'
-	time = time.replace('.', '');
+	time = time.replace(/\./g, '');
 
 	// split time string into start and end times
 	var startTime;
@@ -112,7 +112,7 @@ function parseTimeInterval(time: string): Interval {
 
 function parseDate(date: string): Date {
 	var y;
-	var formats = ['d MMM yyyy', 'MMM d, yyyy', 'yyyy-MM-dd'];
+	var formats = ['d MMM yyyy', 'd MMM, yyy', 'MMM d, yyyy', 'yyyy-MM-dd'];
 	var parsed = false;
 	for (var i = 0; i < formats.length; ++i) {
 		try {
