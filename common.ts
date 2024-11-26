@@ -4,7 +4,7 @@
  */
 function onHomepage(e) {
 	var introText = CardService.newTextParagraph()
-		.setText('Open a message to add an event');
+		.setText('Open a message to add an event.');
 	var section = CardService.newCardSection()
 		.addWidget(introText);
 	var card = CardService.newCardBuilder()
