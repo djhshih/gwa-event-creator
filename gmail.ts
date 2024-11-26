@@ -59,6 +59,10 @@ function parsePrefixedToken(s: string, prefix: RegExp, token: RegExp) {
 
 function parseTimeInterval(time: string): Interval {
 
+	// Utilities.parseDate cannot handle 'a.m.' and 'p.m.',
+	// so remove the '.'
+	time = time.replace('.', '');
+
 	// split time string into start and end times
 	var startTime;
 	var endTime;
