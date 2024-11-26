@@ -129,12 +129,8 @@ function doAddEvent(e) {
 	var card = CardService.newCardBuilder()
 		.addSection(section)
 		.build();
-	
-	var navigation = CardService.newNavigation()
-		.updateCard(card);
-	var response = CardService.newActionResponseBuilder()
-		.setNavigation(navigation);
-	return response.build();	
+
+	return card;
 }
 
 /**
