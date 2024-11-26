@@ -24,6 +24,11 @@ function newCalendarEvent(
 	};
 }
 
+interface Interval {
+	start: string,
+	end: string
+}
+
 /**
  * Return string after eating token in string.
  **/
@@ -50,6 +55,50 @@ function parsePrefixedToken(s: string, prefix: RegExp, token: RegExp) {
 		return '';
 	}
 	return m2[0].trim();
+}
+
+function parseTimeInterval(time: string): Interval {
+
+	// split time string into start and end times
+	var startTime;
+	var endTime;
+
+	// check for dash
+	var j = time.indexOf('-');
+	if (j == -1) {
+		// check for en dash
+		j = time.indexOf('–'); 
+	}
+	if (j == -1) {
+		// check for 'to'
+		j = time.indexOf('to');
+	}
+
+	if (j != -1) {
+		startTime = time.substring(0, j).trim();
+		endTime = time.substring(j + 1).trim();
+	} else {
+		startTime = time;
+		endTime = '';
+	}
+
+	// normalize format of times
+
+	var suffix = /a|p.?m.?/;
+
+	// infer am/pm of start time if it is missing
+	if (startTime.search(suffix) == -1) {
+		j = endTime.search(suffix)
+		if (j != -1) {
+			startTime += ' ' + endTime.substring(j);
+		}
+	}
+
+	if (endTime == '') {
+		endTime = startTime;
+	}
+
+	return {start: startTime, end: endTime};
 }
 
 /**
@@ -115,30 +164,11 @@ function onGmailMessage(e) {
 		description = body;
 	}
 
-	// check for dash
-	var j = time.indexOf('-');
-	if (j == -1) {
-		// check for en dash
-		j = time.indexOf('–'); 
-	}
-	if (j != -1) {
-		startTime = time.substring(0, j).trim();
-		endTime = time.substring(j + 1).trim();
-	} else {
-		startTime = time;
-	}
-	
-	// infer am/pm of start time if it is missing
-	if (startTime.search(/a|pm/) == -1) {
-		j = endTime.search(/a|pm/)
-		if (j != -1) {
-			startTime += ' ' + endTime.substring(j);
-		}
-	}
+	var times = parseTimeInterval(time);
 
 	return createCard(
 		newCalendarEvent(
-			title, date, timeZone, startTime, endTime, location, description
+			title, date, timeZone, times.start, times.end, location, description
 		)
 	);
 }
