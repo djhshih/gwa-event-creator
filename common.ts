@@ -1,3 +1,5 @@
+DATE_FORMAT = 'yyyy-MM-dd';
+
 /**
  * Callback for rendering the homepage card.
  * @return {CardService.Card}
@@ -26,7 +28,7 @@ function createCard(e: CalendarEvent) {
 	var dateText = CardService.newTextInput()
 		.setFieldName('date')
 		.setTitle('Date')
-		.setValue(e.date);
+		.setValue(Utilities.formatDate(e.date, "GMT", DATE_FORMAT));
 
 	var timeZoneText = CardService.newTextInput()
 		.setFieldName('timeZone')
@@ -101,7 +103,7 @@ function doAddEvent(e) {
 	var title = e.formInput.title;
 	var location = e.formInput.location;
 
-	var date = Utilities.parseDate(e.formInput.date, "GMT", "d MMM yyyy");
+	var date = Utilities.parseDate(e.formInput.date, "GMT", DATE_FORMAT);
 
 	var timeZone = e.formInput.timeZone;
 	var startTime = combineDateTime(

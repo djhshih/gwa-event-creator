@@ -1,6 +1,6 @@
 interface CalendarEvent {
 	title: string,
-	date: string,
+	date: Date,
 	timeZone: string,
 	startTime: string,
 	endTime: string,
@@ -9,7 +9,7 @@ interface CalendarEvent {
 }
 
 function newCalendarEvent(
-	title: string, date: string, timeZone: string,
+	title: string, date: Date, timeZone: string,
 	startTime: string, endTime: string,
 	location:string , description: string
 ) {
@@ -104,6 +104,22 @@ function parseTimeInterval(time: string): Interval {
 	}
 
 	return {start: startTime, end: endTime};
+}
+
+function parseDate(date: string): Date {
+	var y;
+	var formats = ['d MMM yyyy', 'MMM d, yyyy', 'yyyy-MM-dd'];
+	var parsed = false;
+	for (var i = 0; i < formats.length; ++i) {
+		try {
+			y = Utilities.parseDate(date, "GMT", formats[i]);
+			parsed = true;
+		} catch {
+			// do nothing
+		}
+		if (parsed) break;
+	}
+	return y;
 }
 
 /**
@@ -204,7 +220,7 @@ function onGmailMessage(e) {
 
 	return createCard(
 		newCalendarEvent(
-			title, date, timeZone, times.start, times.end, location, description
+			title, parseDate(date), timeZone, times.start, times.end, location, description
 		)
 	);
 }
