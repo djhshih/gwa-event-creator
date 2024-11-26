@@ -9,9 +9,10 @@ interface CalendarEvent {
 }
 
 function newCalendarEvent(
-	title, date, timeZone,
-	startTime, endTime,
-	location, description) {
+	title: string, date: string, timeZone: string,
+	startTime: string, endTime: string,
+	location:string , description: string
+) {
 	return {
 		title: title,
 		date: date,
@@ -21,6 +22,16 @@ function newCalendarEvent(
 		location: location,
 		description: description
 	};
+}
+
+function parseToken(s: string, prefix: RegExp, prefixEnd: string, tokenEnd: string) {
+	var i = s.search(prefix);
+	if (i == -1) {
+		return '';
+	}
+	var start = s.indexOf(prefixEnd, i + 1) + 1;
+	var end = endOf(s, tokenEnd, start);
+	return s.substring(start, end).trim();
 }
 
 /**
@@ -36,53 +47,36 @@ function onGmailMessage(e) {
 
 	var message = GmailApp.getMessageById(messageId);
 
-	// Use message subject as tentative title,
-	// stripping 'Re:', 'Fw:', or similar prefix
-	// and anything enclosed in []
-	var title = message.getSubject()
-			.replace(/^(re)|(fwd?)\:\s*/i, '')
-			.replace(/^\[.*?\]\s*/, '');
 
 	var body = message.getPlainBody();
 
-	var date = '';
-	var startTime = '';
-	var endTime = '';
-	var location = '';
-	var description = '';
 	var timeZone = CalendarApp.getTimeZone();
 
-	var i = body.search(/title:/i);
-	if (i != -1) {
-		var part = body.substring(i + 6);
-		i = endOfLine(part);
-		title = part.substring(0, i).trim();
+	var title = parseToken(body, /title:/i, ':', '\n');
+	if (title == '') {
+		// Use message subject as tentative title,
+		// stripping 'Re:', 'Fw:', or similar prefix
+		// and anything enclosed in []
+		title = message.getSubject()
+			.replace(/^(re)|(fwd?)\:\s*/i, '')
+			.replace(/^\[.*?\]\s*/, '');
 	}
 
-	i = body.search(/date:/i);
-	if (i != -1) {
-		var part = body.substring(i + 5);
-		i = endOfLine(part);
-		date = part.substring(0, i).replace(/\(.*\)/, '').trim();
-	}	
+	// remove any parenthesized value (e.g. day of week)
+	var date = parseToken(body, /date:/i, ':', '\n')
+		.replace(/\(.*\)/, '');
+	var time = parseToken(body, /time:/i, ':', '\n');
 
-	i = body.search(/time:/i);
-	if (i != -1) {
-		var part = body.substring(i + 5);
-		i = endOfLine(part);
-		time = part.substring(0, i).trim();
+	var location = parseToken(body, /venue:/i, ':', '\n');
+	if (location == '') {
+		location = parseToken(body, /location:/i, ':', '\n');
 	}
 
-	i = body.search(/venue:/i);
-	if (i == 1) {
-		i = body.search(/location:/i);
-	}
-	if (i != -1) {
-		i = body.indexOf(':', i+1) + 1;
-		var part = body.substring(i);
-		i = endOfLine(part);
-		location = part.substring(0, i).trim();
-	}
+	var description = '';
+	var startTime = '';
+	var endTime = '';
+
+	var i;
 
 	i = body.search(/biography:?/i);
 	if (i == -1) {
@@ -91,7 +85,7 @@ function onGmailMessage(e) {
 	if (i != -1) {
 		i = body.indexOf('\n', i+1);
 		var part = body.substring(i);
-		i = endOfParagraph(part);
+		i = endOf(part, '\n\n', i);
 		description = part.substring(0, i).trim();
 	} else {
 		description = body;
@@ -123,18 +117,10 @@ function onGmailMessage(e) {
 	);
 }
 
-function endOfLine(s) {
-	var i = s.indexOf('\n');
+function endOf(s: string, token: string, start: number) {
+	var i = s.indexOf(token, start);
 	if (i == -1) {
-		i = s.length;
-	}
-	return i;
-}
-
-function endOfParagraph(s) {
-	var i = s.indexOf('\n\n');
-	if (i == -1) {
-		i = s.length;
+		return s.length;
 	}
 	return i;
 }
