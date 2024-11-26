@@ -1,5 +1,3 @@
-DATE_FORMAT = 'yyyy-MM-dd';
-
 /**
  * Callback for rendering the homepage card.
  * @return {CardService.Card}
@@ -20,6 +18,9 @@ function onHomepage(e) {
  * @return {CardService.Card}
  */
 function createCard(e: CalendarEvent) {
+	var errorText = CardService.newTextParagraph()
+		.setText(`<font color="#FF0000">${e.error}</font>`);
+
 	var titleText = CardService.newTextInput()
 		.setFieldName('title')
 		.setTitle('Title')
@@ -28,7 +29,7 @@ function createCard(e: CalendarEvent) {
 	var dateText = CardService.newTextInput()
 		.setFieldName('date')
 		.setTitle('Date')
-		.setValue(Utilities.formatDate(e.date, "GMT", DATE_FORMAT));
+		.setValue(e.date);
 
 	var timeZoneText = CardService.newTextInput()
 		.setFieldName('timeZone')
@@ -65,6 +66,7 @@ function createCard(e: CalendarEvent) {
 
 	// Assemble the widgets
 	var section = CardService.newCardSection()
+		.addWidget(errorText)
 		.addWidget(titleText)
 		.addWidget(dateText)
 		.addWidget(timeZoneText)

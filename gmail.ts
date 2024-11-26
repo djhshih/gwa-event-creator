@@ -1,17 +1,21 @@
+const DATE_FORMAT = 'yyyy-MM-dd';
+
 interface CalendarEvent {
 	title: string,
-	date: Date,
+	date: string,
 	timeZone: string,
 	startTime: string,
 	endTime: string,
 	location: string,
-	description: string
+	description: string,
+	error: string
 }
 
 function newCalendarEvent(
-	title: string, date: Date, timeZone: string,
+	title: string, date: string, timeZone: string,
 	startTime: string, endTime: string,
-	location:string , description: string
+	location: string , description: string,
+	error: string
 ) {
 	return {
 		title: title,
@@ -20,7 +24,8 @@ function newCalendarEvent(
 		startTime: startTime,
 		endTime: endTime,
 		location: location,
-		description: description
+		description: description,
+		error: error
 	};
 }
 
@@ -111,7 +116,7 @@ function parseTimeInterval(time: string): Interval {
 }
 
 function parseDate(date: string): Date {
-	var y;
+	var y = null;
 	var formats = ['d MMM yyyy', 'd MMM, yyy', 'MMM d, yyyy', 'yyyy-MM-dd'];
 	var parsed = false;
 	for (var i = 0; i < formats.length; ++i) {
@@ -201,6 +206,7 @@ function onGmailMessage(e) {
 		location = parsePrefixedToken(body, /location\s*:/i, /\s*.+/);
 	}
 
+	var error = '';
 	var description = '';
 	var startTime = '';
 	var endTime = '';
@@ -222,9 +228,19 @@ function onGmailMessage(e) {
 
 	var times = parseTimeInterval(time);
 
+	// attempt to parse date here
+	var dateObj = parseDate(date);
+	if (dateObj != null) {
+		// standardize format
+		date = Utilities.formatDate(dateObj, 'GMT', DATE_FORMAT);
+	} else {
+		// add note that date failed to parse)
+		error += 'Error: Unrecognized date format. Please re-write in ' + DATE_FORMAT + ' format.\n';
+	}
+
 	return createCard(
 		newCalendarEvent(
-			title, parseDate(date), timeZone, times.start, times.end, location, description
+			title, date, timeZone, times.start, times.end, location, description, error
 		)
 	);
 }
