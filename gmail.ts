@@ -1,3 +1,28 @@
+interface CalendarEvent {
+	title: string,
+	date: string,
+	timeZone,
+	startTime: string,
+	endTime: string,
+	location: string,
+	description: string
+}
+
+function newCalendarEvent(
+	title, date, timeZone,
+	startTime, endTime,
+	location, description) {
+	return {
+		title: title,
+		date: date,
+		timeZone: timeZone,
+		startTime: startTime,
+		endTime: endTime,
+		location: location,
+		description: description
+	};
+}
+
 
 /**
  * Callback for when a message is loaded.
@@ -92,7 +117,11 @@ function onGmailMessage(e) {
 		startTime = time;
 	}
 
-	return createCard(title, date, timeZone, startTime, endTime, location, description);
+	return createCard(
+		newCalendarEvent(
+			title, date, timeZone, startTime, endTime, location, description
+		)
+	);
 }
 
 function endOfLine(s) {

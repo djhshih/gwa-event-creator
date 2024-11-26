@@ -17,45 +17,45 @@ function onHomepage(e) {
  * Callback for creating a card to add an event
  * @return {CardService.Card}
  */
-function createCard(title, date, timeZone, startTime, endTime, location, description) {
+function createCard(e: CalendarEvent) {
 	var titleText = CardService.newTextInput()
 		.setFieldName('title')
 		.setTitle('Title')
-		.setValue(title);
+		.setValue(e.title);
 
 	var dateText = CardService.newTextInput()
 		.setFieldName('date')
 		.setTitle('Date')
-		.setValue(date);
+		.setValue(e.date);
 
 	var timeZoneText = CardService.newTextInput()
 		.setFieldName('timeZone')
 		.setTitle('Time Zone')
-		.setValue(timeZone.id);
+		.setValue(e.timeZone.id);
 
 	var startText = CardService.newTextInput()
 		.setFieldName('startTime')
 		.setTitle('Start')
-		.setValue(startTime);
+		.setValue(e.startTime);
 
 	var endText = CardService.newTextInput()
 		.setFieldName('endTime')
 		.setTitle('End')
-		.setValue(endTime);
+		.setValue(e.endTime);
 
 	var locationText = CardService.newTextInput()
 		.setFieldName('location')
 		.setTitle('Location')
-		.setValue(location);
+		.setValue(e.location);
 
 	var descriptionText = CardService.newTextParagraph()
-		.setText(description);
+		.setText(e.description);
 
 	// Create a button for adding event
 	// Note: Action parameter keys and values must be strings.
 	var action = CardService.newAction()
 		.setFunctionName('doAddEvent')
-		.setParameters({description: description});
+		.setParameters({description: e.description});
 	var addButton = CardService.newTextButton()
 		.setText('Add')
 		.setOnClickAction(action)
@@ -75,17 +75,17 @@ function createCard(title, date, timeZone, startTime, endTime, location, descrip
 	var footer = CardService.newFixedFooter()
 		.setPrimaryButton(addButton);
 
-	var builder = CardService.newCardBuilder()
-		.addSection(section)
-		.setFixedFooter(footer);
-
 	// Create the header shown when the card is minimized,
 	// but only when this card is a contextual card. Peek headers
 	// are never used by non-contexual cards like homepages.
 	var peekHeader = CardService.newCardHeader()
 		.setTitle('Event')
-		.setSubtitle(title);
-	builder.setPeekCardHeader(peekHeader)
+		.setSubtitle(e.title);
+
+	var builder = CardService.newCardBuilder()
+		.addSection(section)
+		.setFixedFooter(footer)
+		.setPeekCardHeader(peekHeader);
 
 	return builder.build();
 }
