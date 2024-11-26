@@ -39,22 +39,17 @@ function eatToken(s: string, token: RegExp, tokenEnd: string) {
 /**
  * Return parsed token after prefix in string.
  **/
-function parseToken(s: string, prefix: RegExp, prefixEnd: string, token: RegExp, tokenEnd: string) {
-	var i = s.search(prefix);
-	if (i == -1) {
+function parsePrefixedToken(s: string, prefix: RegExp, token: RegExp) {
+	var m1 = prefix.exec(s);
+	if (m1 == null) {
 		return '';
 	}
-	var j = s.indexOf(prefixEnd, i + 1) + 1;
-	if (j == -1) {
+	var j = m1.index + m1[0].length;
+	var m2 = token.exec(s.substring(j));
+	if (m2 == null) {
 		return '';
 	}
-	var start = s.substring(j).search(token);
-	if (start == -1) {
-		return '';
-	}
-	start += j;
-	var end = endOf(s, tokenEnd, start);
-	return s.substring(start, end).trim();
+	return m2[0].trim();
 }
 
 /**
@@ -84,19 +79,21 @@ function onGmailMessage(e) {
 	// Remove possible email header
 	body = eatToken(body, /Subject: /, '\n');
 
-	var title = parseToken(body, /title\s*:/i, ':', /\w+/, '\n');
+	var title = parsePrefixedToken(body, /title\s*:/i, /\s*.+/);
 	if (title == '') {
 		title = subject;
 	}
 
 	// remove any parenthesized value (e.g. day of week)
-	var date = parseToken(body, /date\s*:/i, ':', /\w+/, '\n')
-		.replace(/\(.*\)/, '');
-	var time = parseToken(body, /time\s*:/i, ':', /[0-9]+(:[0-9]+)?\s*(a|pm)?/, '\n');
+	var date = parsePrefixedToken(body, /date\s*:/i, /\s*[0-9A-Za-z ,./]+/i);
+	var time = parsePrefixedToken(body,
+		/time\s*:/i,
+		/\s*[0-9]+(:[0-9]+)?\s*(a|p\.?m\.?)?\s*(-|(to))?\s*[0-9]+(:[0-9]+)?\s*(a|p\.?m\.?)?/i
+	);
 
-	var location = parseToken(body, /venue\s*:/i, ':', /\w+/, '\n');
+	var location = parsePrefixedToken(body, /venue\s*:/i, /\s*.+/);
 	if (location == '') {
-		location = parseToken(body, /location\s*:/i, ':', /\w+/, '\n');
+		location = parsePrefixedToken(body, /location\s*:/i, /\s*.+/);
 	}
 
 	var description = '';
