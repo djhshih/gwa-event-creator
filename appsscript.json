@@ -12,7 +12,6 @@
   "addOns": {
     "common": {
       "name": "Event",
-      "useLocaleFromApp": true,
       "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/event_grey600_48dp.png",
       "homepageTrigger": {
         "runFunction": "onHomepage",

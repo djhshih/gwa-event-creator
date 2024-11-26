@@ -6,8 +6,6 @@ A Google Workspace add-on for creating Google calendar events.
 
 Set up an Apps Script project by following this [guide][1].
 
-Update the time zone in `appsscript.json`.
-
 Then, you can push this [apps script][2] project with [clasp][3] by
 ```
 clasp push
