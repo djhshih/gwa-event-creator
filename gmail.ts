@@ -54,26 +54,23 @@ function onGmailMessage(e) {
 
 	var i = body.search(/title:/i);
 	if (i != -1) {
-		body = body.substring(i + 6);
-		i = endOfLine(body);
-		title = body.substring(0, i).trim();
-		body = body.substring(i + 1);
+		var part = body.substring(i + 6);
+		i = endOfLine(part);
+		title = part.substring(0, i).trim();
 	}
 
 	i = body.search(/date:/i);
 	if (i != -1) {
-		body = body.substring(i + 5);
-		i = endOfLine(body);
-		date = body.substring(0, i).replace(/\(.*\)/, '').trim();
-		body = body.substring(i + 1);
+		var part = body.substring(i + 5);
+		i = endOfLine(part);
+		date = part.substring(0, i).replace(/\(.*\)/, '').trim();
 	}	
 
 	i = body.search(/time:/i);
 	if (i != -1) {
-		body = body.substring(i + 5);
-		i = endOfLine(body);
-		time = body.substring(0, i).trim();
-		body = body.substring(i + 1);
+		var part = body.substring(i + 5);
+		i = endOfLine(part);
+		time = part.substring(0, i).trim();
 	}
 
 	i = body.search(/venue:/i);
@@ -82,22 +79,20 @@ function onGmailMessage(e) {
 	}
 	if (i != -1) {
 		i = body.indexOf(':', i+1) + 1;
-		body = body.substring(i);
-		i = endOfLine(body);
-		location = body.substring(0, i).trim();
-		body = body.substring(i + 1);
+		var part = body.substring(i);
+		i = endOfLine(part);
+		location = part.substring(0, i).trim();
 	}
 
-	i = body.search(/biography/i);
-	if (i == 1) {
-		i = body.search(/abstract/i);
+	i = body.search(/biography:?/i);
+	if (i == -1) {
+		i = body.search(/abstract:?/i);
 	}
 	if (i != -1) {
 		i = body.indexOf('\n', i+1);
-		body = body.substring(i);
-		i = endOfParagraph(body);
-		description = body.substring(0, i).trim();
-		body = body.substring(i + 1);
+		var part = body.substring(i);
+		i = endOfParagraph(part);
+		description = part.substring(0, i).trim();
 	} else {
 		description = body;
 	}
