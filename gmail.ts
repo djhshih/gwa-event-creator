@@ -65,6 +65,7 @@ function parseTimeInterval(time: string): Interval {
 
 	// check for dash
 	var j = time.indexOf('-');
+	var offset = 1;
 	if (j == -1) {
 		// check for en dash
 		j = time.indexOf('–'); 
@@ -72,11 +73,12 @@ function parseTimeInterval(time: string): Interval {
 	if (j == -1) {
 		// check for 'to'
 		j = time.indexOf('to');
+		offset = 2;
 	}
 
 	if (j != -1) {
 		startTime = time.substring(0, j).trim();
-		endTime = time.substring(j + 1).trim();
+		endTime = time.substring(j + offset).trim();
 	} else {
 		startTime = time;
 		endTime = '';
@@ -84,7 +86,7 @@ function parseTimeInterval(time: string): Interval {
 
 	// normalize format of times
 
-	var suffix = /a|p.?m.?/;
+	var suffix = /a|p.?m.?/i;
 
 	// infer am/pm of start time if it is missing
 	if (startTime.search(suffix) == -1) {
@@ -94,11 +96,45 @@ function parseTimeInterval(time: string): Interval {
 		}
 	}
 
+	startTime = normalizeTime(startTime);
 	if (endTime == '') {
 		endTime = startTime;
+	} else {
+		endTime = normalizeTime(endTime);
 	}
 
 	return {start: startTime, end: endTime};
+}
+
+/**
+ * Normalize time string.
+ */
+function normalizeTime(time: string) {
+
+	var i;
+
+	// Insert space between time and am/pm suffix
+	i = time.search(/a|p.?m.?/i);
+	if (i > 0) {
+		if (time[i - 1] != ' ') {
+			// insert space
+			time = time.substring(0, i) + ' ' + time.substring(i);
+		}
+	}
+
+	// Add minutes if omitted
+	i = time.search(/:\d+/);
+	if (i == -1) {
+		var j = time.indexOf(' ');
+		if (j != -1) {
+			// insert minutes
+			time = time.substring(0, j) + ':00' + time.substring(j);
+		} else {
+			time += ':00';
+		}
+	}
+
+	return time;
 }
 
 /**
@@ -137,7 +173,7 @@ function onGmailMessage(e) {
 	var date = parsePrefixedToken(body, /date\s*:/i, /\s*[0-9A-Za-z ,./]+/i);
 	var time = parsePrefixedToken(body,
 		/time\s*:/i,
-		/\s*[0-9]+(:[0-9]+)?\s*(a|p\.?m\.?)?\s*(-|(to))?\s*[0-9]+(:[0-9]+)?\s*(a|p\.?m\.?)?/i
+		/\s*[0-9]+(:[0-9]+)?\s*(a|p\.?m\.?)?\s*(-|–|(to))?\s*[0-9]+(:[0-9]+)?\s*(a|p\.?m\.?)?/i
 	);
 
 	var location = parsePrefixedToken(body, /venue\s*:/i, /\s*.+/);
