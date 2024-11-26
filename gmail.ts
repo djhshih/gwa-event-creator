@@ -23,7 +23,6 @@ function newCalendarEvent(
 	};
 }
 
-
 /**
  * Callback for when a message is loaded.
  * @param {Object} e The event object.
@@ -31,13 +30,13 @@ function newCalendarEvent(
 function onGmailMessage(e) {
 	var messageId = e.gmail.messageId;
 	
-	// get access token and use it for GmailApp calls
+	// Get access token and use it for GmailApp calls
 	var accessToken = e.gmail.accessToken;
 	GmailApp.setCurrentMessageAccessToken(accessToken);
 
 	var message = GmailApp.getMessageById(messageId);
 
-	// get message subject,
+	// Use message subject as tentative title,
 	// stripping 'Re:', 'Fw:', or similar prefix
 	// and anything enclosed in []
 	var title = message.getSubject()
