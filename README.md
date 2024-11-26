@@ -21,10 +21,6 @@ In Gmail,
    right-bar.
 3. Verify the populated information and click "Add".
 
-## TODO
-
-More robust parsing to identify event details.
-
 
 [1]: https://developers.google.com/workspace/add-ons/quickstart/cats-quickstart#common.gs
 [2]: https://script.google.com
