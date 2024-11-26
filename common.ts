@@ -3,25 +3,20 @@
  * @return {CardService.Card}
  */
 function onHomepage(e) {
-	console.log(e);
-	var hour = Number(Utilities.formatDate(new Date(), e.userTimezone.id, 'H'));
-	var message;
-	if (hour >= 6 && hour < 12) {
-		message = 'Good morning';
-	} else if (hour >= 12 && hour < 18) {
-		message = 'Good afternoon';
-	} else {
-		message = 'Good night';
-	}
-	message += ' ' + e.hostApp;
-	return createCard(message, true);
+	var introText = CardService.newTextParagraph()
+		.setText('Open a message to add an event');
+	var section = CardService.newCardSection()
+		.addWidget(introText);
+	var card = CardService.newCardBuilder()
+		.addSection(section);
+	return card.build();
 }
 
 /**
  * Callback for Creating a card to add an event
  * @return {CardService.Card}
  */
-function createCard(title, date, startTime, endTime, location, description) {
+function createCard(title, date, timeZone, startTime, endTime, location, description) {
 	var titleText = CardService.newTextInput()
 		.setFieldName('title')
 		.setTitle('Title')
@@ -31,6 +26,11 @@ function createCard(title, date, startTime, endTime, location, description) {
 		.setFieldName('date')
 		.setTitle('Date')
 		.setValue(date);
+
+	var timeZoneText = CardService.newTextInput()
+		.setFieldName('timeZone')
+		.setTitle('Time Zone')
+		.setValue(timeZone.id);
 
 	var startText = CardService.newTextInput()
 		.setFieldName('startTime')
@@ -62,10 +62,11 @@ function createCard(title, date, startTime, endTime, location, description) {
 	var buttonSet = CardService.newButtonSet()
 			.addButton(button);
 
-	// Assemble the widgets and return the card.
+	// Assemble the widgets and return the card
 	var section = CardService.newCardSection()
 			.addWidget(titleText)
 			.addWidget(dateText)
+			.addWidget(timeZoneText)
 			.addWidget(startText)
 			.addWidget(endText)
 			.addWidget(locationText)
@@ -79,7 +80,6 @@ function createCard(title, date, startTime, endTime, location, description) {
 	// are never used by non-contexual cards like homepages.
 	var peekHeader = CardService.newCardHeader()
 		.setTitle('Event')
-		.setImageUrl('https://www.gstatic.com/images/icons/material/system/1x/pets_black_48dp.png')
 		.setSubtitle(title);
 	card.setPeekCardHeader(peekHeader)
 
@@ -97,7 +97,8 @@ function doAddEvent(e) {
 	var title = e.formInput.title;
 	var location = e.formInput.location;
 
-	var timeZone = Session.getScriptTimeZone();
+	var timeZone = e.formInput.timeZone;
+
 	var date = Utilities.parseDate(e.formInput.date, timeZone, "d MMM yyyy");
 	var startTime = combineDateTime(
 		date, Utilities.parseDate(e.formInput.startTime, timeZone, "h:mm a")

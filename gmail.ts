@@ -27,6 +27,7 @@ function onGmailMessage(e) {
 	var endTime = '';
 	var location = '';
 	var description = '';
+	var timeZone = e.userTimezone;
 
 	var i = body.search(/title:/i);
 	if (i != -1) {
@@ -91,7 +92,7 @@ function onGmailMessage(e) {
 		startTime = time;
 	}
 
-	return createCard(title, date, startTime, endTime, location, description);
+	return createCard(title, date, timeZone, startTime, endTime, location, description);
 }
 
 function endOfLine(s) {
