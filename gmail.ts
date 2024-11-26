@@ -46,7 +46,6 @@ function onGmailMessage(e) {
 
 	var body = message.getPlainBody();
 
-	var title = '';
 	var date = '';
 	var startTime = '';
 	var endTime = '';
