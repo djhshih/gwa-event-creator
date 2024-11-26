@@ -49,7 +49,7 @@ function eatToken(s: string, token: RegExp, tokenEnd: string) {
 /**
  * Return parsed token after prefix in string.
  **/
-function parsePrefixedToken(s: string, prefix: RegExp, token: RegExp) {
+export function parsePrefixedToken(s: string, prefix: RegExp, token: RegExp) {
 	var m1 = prefix.exec(s);
 	if (m1 == null) {
 		return '';
@@ -60,6 +60,42 @@ function parsePrefixedToken(s: string, prefix: RegExp, token: RegExp) {
 		return '';
 	}
 	return m2[0].trim();
+}
+
+function isWhitespace(c) {
+	return c === ' '
+		|| c === '\n'
+		|| c === '\t'
+		|| c === '\r'
+		|| c === '\f'
+		|| c === '\v'
+		|| c === '\u00a0'
+		|| c === '\u1680'
+		|| c === '\u2000'
+		|| c === '\u200a'
+		|| c === '\u2028'
+		|| c === '\u2029'
+		|| c === '\u202f'
+		|| c === '\u205f'
+		|| c === '\u3000'
+		|| c === '\ufeff';
+}
+
+/**
+ * Return paragraph after prefix in string.
+ **/
+export function parsePrefixedParagraph(s: string, prefix: RegExp) {
+	var m = prefix.exec(s);
+	if (m == null) {
+		return '';
+	}
+	var start = m.index + m[0].length;
+	// ignore whitespace
+	while (isWhitespace(s[start])) {
+		++start;
+	}
+	var end = endOf(s, '\n\n', start);
+	return s.substring(start, end);
 }
 
 function parseTimeInterval(time: string): Interval {
@@ -189,6 +225,9 @@ function onGmailMessage(e) {
 	// Remove possible email header
 	body = eatToken(body, /Subject: /, '\n');
 
+	// Remove return characters, which makes \n\n detection difficult
+	body = body.replace(/\r/g, '');
+
 	var title = parsePrefixedToken(body, /title\s*:/i, /\s*.+/);
 	if (title == '') {
 		title = subject;
@@ -213,17 +252,22 @@ function onGmailMessage(e) {
 
 	var i;
 
-	i = body.search(/biography:?/i);
-	if (i == -1) {
-		i = body.search(/abstract:?/i);
+	var biography = parsePrefixedParagraph(body, /^ *biography:?\s*$/im);
+	if (biography == '') {
+		biography = parsePrefixedParagraph(body, /^ *speakers?:?\s*$/im);
 	}
-	if (i != -1) {
-		i = body.indexOf('\n', i+1);
-		var part = body.substring(i);
-		i = endOf(part, '\n\n', i);
-		description = part.substring(0, i).trim();
-	} else {
-		description = body;
+
+	var abstract = parsePrefixedParagraph(body, /^ *abstract:?\s*$/im);
+	if (abstract == '') {
+		abstract = parsePrefixedParagraph(body, /^ *(seminar )?overview?:?\s*$/im);
+	}
+
+	if (biography != '') {
+		description += 'Biography:\n' + biography + '\n\n';
+	}
+
+	if (abstract != '') {
+		description += 'Abstract:\n' + abstract + '\n\n';
 	}
 
 	var times = parseTimeInterval(time);
