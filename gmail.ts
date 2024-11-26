@@ -114,6 +114,12 @@ function onGmailMessage(e) {
 	} else {
 		startTime = time;
 	}
+	
+	// infer am/pm for start time if it is missing
+	if (startTime.search(/a|pm/) == -1) {
+		j = endTime.search(/a|pm/)
+		startTime += ' ' + endTime.substring(j);
+	}
 
 	return createCard(
 		newCalendarEvent(
