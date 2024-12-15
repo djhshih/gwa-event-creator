@@ -1,4 +1,5 @@
 const DATE_FORMAT = 'yyyy-MM-dd';
+const TIME_FORMAT = 'h:mm a';
 
 interface CalendarEvent {
 	title: string,
@@ -133,10 +134,10 @@ function doAddEvent(e) {
 
 	var timeZone = e.formInput.timeZone;
 	var startTime = combineDateTime(
-		date, Utilities.parseDate(e.formInput.startTime, timeZone, "h:mm a")
+		date, Utilities.parseDate(e.formInput.startTime, timeZone, TIME_FOMAT)
 	);
 	var endTime = combineDateTime(
-		date, Utilities.parseDate(e.formInput.endTime, timeZone, "h:mm a")
+		date, Utilities.parseDate(e.formInput.endTime, timeZone, TIME_FORMAT)
 	);
 	var description = e.parameters.description;
 

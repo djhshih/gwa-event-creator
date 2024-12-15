@@ -72,6 +72,20 @@ function onGmailMessage(e) {
 
 	var times = parseTimeInterval(time);
 
+	// attempt to parse time
+	var startTimeObj = parseTime(times.start);
+	if (startTimeObj != null) {
+		times.start = Utilities.formatDate(startTimeObj, 'GMT', TIME_FORMAT);
+	}
+	var endTimeObj = parseTime(times.end);
+	if (endTimeObj != null) {
+		times.end = Utilities.formatDate(endTimeObj, 'GMT', TIME_FORMAT);
+	}
+
+	if (startTimeObj == null || endTimeObj == null) {
+		error += 'Error: Unrecognized time format. Please re-write in ' + TIME_FORMAT + ' format.\n';
+	}
+
 	date = normalizeDate(date);
 
 	// attempt to parse date here

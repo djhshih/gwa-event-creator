@@ -152,7 +152,7 @@ function parseDate(date: string): Date {
 /**
  * Normalize time string.
  */
-function normalizeTime(time: string) {
+function normalizeTime(time: string): string {
 
 	var i;
 
@@ -178,6 +178,22 @@ function normalizeTime(time: string) {
 	}
 
 	return time;
+}
+
+function parseTime(time: string): Date {
+	var y = null;
+	var formats = ['h:mm a', 'HH:mm'];
+	var parsed = false;
+	for (var i = 0; i < formats.length; ++i) {
+		try {
+			y = Utilities.parseDate(time, "GMT", formats[i]);
+			parsed = true;
+		} catch {
+			// do nothing
+		}
+		if (parsed) break;
+	}
+	return y;
 }
 
 function endOf(s: string, token: string, start: number) {
