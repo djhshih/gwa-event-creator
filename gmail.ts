@@ -72,6 +72,8 @@ function onGmailMessage(e) {
 
 	var times = parseTimeInterval(time);
 
+	date = normalizeDate(date);
+
 	// attempt to parse date here
 	var dateObj = parseDate(date);
 	if (dateObj != null) {

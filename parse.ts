@@ -120,9 +120,22 @@ function parseTimeInterval(time: string): Interval {
 	return {start: startTime, end: endTime};
 }
 
+function normalizeDate(date: string): string {
+	// remove 'st', 'nd, 'rd, and 'th' from numbers
+	date = date.replace(/(\d+)(st|nd|rd|th)/, '$1');
+
+	// remove commas
+	date = date.replace(/,/, '');
+
+	// remove day of week
+	date = date.replace(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s*/i, '');
+
+	return date;
+}
+
 function parseDate(date: string): Date {
 	var y = null;
-	var formats = ['d MMM yyyy', 'd MMM, yyy', 'MMM d, yyyy', 'yyyy-MM-dd'];
+	var formats = ['yyyy-MM-dd', 'd MMM yyyy', 'MMM d yyyy'];
 	var parsed = false;
 	for (var i = 0; i < formats.length; ++i) {
 		try {
