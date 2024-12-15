@@ -1,3 +1,34 @@
+const DATE_FORMAT = 'yyyy-MM-dd';
+
+interface CalendarEvent {
+	title: string,
+	date: string,
+	timeZone: string,
+	startTime: string,
+	endTime: string,
+	location: string,
+	description: string,
+	error: string
+}
+
+function newCalendarEvent(
+	title: string, date: string, timeZone: string,
+	startTime: string, endTime: string,
+	location: string , description: string,
+	error: string
+) {
+	return {
+		title: title,
+		date: date,
+		timeZone: timeZone,
+		startTime: startTime,
+		endTime: endTime,
+		location: location,
+		description: description,
+		error: error
+	};
+}
+
 /**
  * Callback for rendering the homepage card.
  * @return {CardService.Card}
@@ -94,13 +125,6 @@ function createCard(e: CalendarEvent) {
 	return builder.build();
 }
 
-function combineDateTime(date, time) {
-	date = new Date(date);
-	date.setHours(time.getHours());
-	date.setMinutes(time.getMinutes());
-	return date;
-}
-
 function doAddEvent(e) {
 	var title = e.formInput.title;
 	var location = e.formInput.location;
@@ -140,6 +164,13 @@ function doAddEvent(e) {
 		.build();
 
 	return card;
+}
+
+function combineDateTime(date, time) {
+	date = new Date(date);
+	date.setHours(time.getHours());
+	date.setMinutes(time.getMinutes());
+	return date;
 }
 
 /**
