@@ -134,7 +134,7 @@ function doAddEvent(e) {
 
 	var timeZone = e.formInput.timeZone;
 	var startTime = combineDateTime(
-		date, Utilities.parseDate(e.formInput.startTime, timeZone, TIME_FOMAT)
+		date, Utilities.parseDate(e.formInput.startTime, timeZone, TIME_FORMAT)
 	);
 	var endTime = combineDateTime(
 		date, Utilities.parseDate(e.formInput.endTime, timeZone, TIME_FORMAT)
