@@ -139,9 +139,15 @@ function doAddEvent(e) {
 	var startTime = combineDateTime(
 		date, Utilities.parseDate(e.formInput.startTime, timeZone, TIME_FORMAT)
 	);
-	var endTime = combineDateTime(
-		date, Utilities.parseDate(e.formInput.endTime, timeZone, TIME_FORMAT)
-	);
+	if (e.formInput.endTime != "") {
+		var endTime = combineDateTime(
+			date, Utilities.parseDate(e.formInput.endTime, timeZone, TIME_FORMAT)
+		);
+	} else {
+		endTime = new Date(startTime);
+		// add one hour
+		endTime.setHours(endTime.getHours() + 1);
+	}
 	var description = e.parameters.description;
 
 	// create event
