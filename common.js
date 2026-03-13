@@ -176,17 +176,3 @@ function combineDateTime(date, time) {
 	date.setMinutes(time.getMinutes());
 	return date;
 }
-
-/**
- * Truncate a string to specified length.
- * @param {string} string
- * @return {string} truncated string
- */
-function truncate(str, length=40) {
-	if (str.length > length) {
-		str = str.slice(0, length);
-		str = str.slice(0, str.lastIndexOf(' ')) + '...';
-	}
-	return str;
-}
-

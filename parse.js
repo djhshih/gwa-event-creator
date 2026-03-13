@@ -237,6 +237,19 @@ function endOf(s, token, start) {
 	return i;
 }
 
+/**
+ * Truncate a string to specified length.
+ * @param str   string
+ * @return truncated string
+ */
+function truncate(str, length=40) {
+	if (str.length > length) {
+		str = str.slice(0, length);
+		str = str.slice(0, str.lastIndexOf(' ')) + '...';
+	}
+	return str;
+}
+
 function parseBody(body) {
 	// Remove possible email header
 	body = eatToken(body, /Subject: /, '\n');
