@@ -85,7 +85,7 @@ function parsePrefixedParagraph(s, prefix) {
  * @param time  string
  * @return string
  */
-function parseTimeInterval(time) {
+function normalizeTimeInterval(time) {
 
 	// Utilities.parseDate cannot handle 'a.m.' and 'p.m.',
 	// so remove the '.'
