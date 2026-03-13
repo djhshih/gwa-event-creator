@@ -325,16 +325,14 @@ function extractDescription(body) {
 function extractDateTime(body) {
 	var error = "";
 
-	// initial extraction: date and time fields (time uses a permissive matcher)
+	// extract date
 	var date = parsePrefixedToken(body, /date(\s(and|&)\stime)?\s*:/i, /\s*.+/i);
-	var time = parsePrefixedToken(body, /time(\s(and|&)\sdate)?\s*:/i, /\s*.+/i);
-
-	// collapse multiple spaces
 	date = date.replace(/\s+/g, " ").trim();
-	time = time.replace(/\s+/g, " ").trim();
+
+	var time = "";
 
 	// if time is empty, try to extract time from date field
-	if (time == "" && date) {
+	if (date) {
 		var parens = date.match(/\([^)]*\)/g);
 		if (parens) {
 			for (var i = 0; i < parens.length; ++i) {
@@ -354,6 +352,13 @@ function extractDateTime(body) {
 				time = m[2].trim();
 			}
 		}
+	}
+	
+	// fallback: extract time first
+	
+	if (time == "") {
+		time = parsePrefixedToken(body, /time(\s(and|&)\sdate)?\s*:/i, /\s*.+/i);
+		time.replace(/\s+/g, " ").trim();
 	}
 
 	// if date is empty, try to extract date from time field
