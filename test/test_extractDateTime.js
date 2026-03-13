@@ -135,5 +135,32 @@ runTest('Invalid time reports error', () => {
   assertContains(res.error, 'Unrecognized time format', 'time error');
 });
 
+// New: combined Date and Time in single line with parentheses
+runTest('Combined date and time with parentheses (noon variants)', () => {
+  const body = `Date and Time: 16 April 2026 (Thu) (10:30 a.m. to 12:30 noon)\n`;
+  const res = context.extractDateTime(body);
+  assertEquals(res.date, '2026-04-16', 'date');
+  assertEquals(res.times.start, '10:30 AM', 'start time');
+  assertEquals(res.times.end, '12:30 PM', 'end time');
+});
+
+// New: date with inline time
+runTest('Date with inline time', () => {
+  const body = `Date: 16 Jan 2026 10:30 - 11:30 am\n`;
+  const res = context.extractDateTime(body);
+  assertEquals(res.date, '2026-01-16', 'date');
+  assertEquals(res.times.start, '10:30 AM', 'start time');
+  assertEquals(res.times.end, '11:30 AM', 'end time');
+});
+
+// New: time field contains a date then time
+runTest('Time field contains date and 24h range', () => {
+  const body = `Time: May 9, 2024, 10:00 - 16:00\n`;
+  const res = context.extractDateTime(body);
+  assertEquals(res.date, '2024-05-09', 'date');
+  assertEquals(res.times.start, '10:00 AM', 'start time');
+  assertEquals(res.times.end, '4:00 PM', 'end time');
+});
+
 console.log(`\nTests: ${tests}, Passed: ${passed}, Failed: ${tests - passed}`);
 if (passed !== tests) process.exit(1);

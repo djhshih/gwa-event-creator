@@ -310,40 +310,111 @@ function extractDescription(body) {
  * @param error  string for logging errors
  */
 function extractDateTime(body) {
-	var error = '';
+var error = '';
 
-	var date = parsePrefixedToken(body, /date\s*:/i, /\s*[0-9A-Za-z \,.\/\-]+/i);
-	var time = parsePrefixedToken(body,
-		/time\s*:/i,
-		/\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?\s*(-|–|(to))?\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?/i
-	);
+// initial extraction: date and time fields (time uses a permissive matcher)
+var date = parsePrefixedToken(body, /date\s*:/i, /\s*.+/i);
+var time = parsePrefixedToken(body, /time\s*:/i, /\s*.+/i);
 
-	var times = normalizeTimeInterval(time);
-
-	// attempt to parse time
-	var startTimeObj = parseTime(times.start);
-	if (startTimeObj != null) {
-		times.start = Utilities.formatDate(startTimeObj, 'GMT', TIME_FORMAT);
-	}
-	var endTimeObj = parseTime(times.end);
-	if (endTimeObj != null) {
-		times.end = Utilities.formatDate(endTimeObj, 'GMT', TIME_FORMAT);
-	}
-
-	if (startTimeObj == null || (times.end && endTimeObj == null)) {
-		error += 'Error: Unrecognized time format. Please re-write in ' + TIME_FORMAT + ' format.\n';
-	}
-
-	// attempt to parse date here
-	var dateObj = parseDate(normalizeDate(date));
-	if (dateObj != null) {
-		date = Utilities.formatDate(dateObj, 'GMT', DATE_FORMAT);
-	} else {
-		// add note that date failed to parse)
-		error += 'Error: Unrecognized date format. Please re-write in ' + DATE_FORMAT + ' format.\n';
-	}
-
-	return {
-		date: date, times: times, error: error
-	}
+// If there's a combined "Date and Time:" field and date is empty, use it
+if ((!date || date == '') && parsePrefixedToken(body, /date and time\s*:/i, /\s*.+/)) {
+var dtCombined = parsePrefixedToken(body, /date and time\s*:/i, /\s*.+/);
+// extract any parenthesized time, e.g. (10:30 a.m. to 12:30 noon)
+var parens = dtCombined.match(/\([^)]*\)/g);
+if (parens) {
+for (var i = 0; i < parens.length; ++i) {
+var grp = parens[i].replace(/[()]/g, '').trim();
+if (grp.search(/\d|am|pm|noon|midnight|to|-/i) != -1) {
+time = grp;
+dtCombined = dtCombined.replace(parens[i], '');
+break;
 }
+}
+}
+// leftover string is date
+dtCombined = dtCombined.replaceAll(/\s+/g, ' ').trim();
+date = dtCombined.replace(/\(.*\)/g, '').trim();
+}
+
+// If time field is empty but date contains parenthesized or trailing time, extract it
+if ((!time || time == '') && date) {
+var parens = date.match(/\([^)]*\)/g);
+if (parens) {
+for (var i = 0; i < parens.length; ++i) {
+var grp = parens[i].replace(/[()]/g, '').trim();
+if (grp.search(/\d|am|pm|noon|midnight|to|-/i) != -1) {
+time = grp;
+date = date.replace(parens[i], '').trim();
+break;
+}
+}
+}
+// also handle date lines that include trailing time, e.g. "16 Jan 2026 10:30 - 11:30 am"
+if ((!time || time == '') && date.search(/\d:\d|am|pm|noon|midnight|to|-/i) != -1) {
+var m = date.match(/(.*?)(\d{1,2}:\d{2}[\s\S]*)$/);
+if (m) {
+date = m[1].trim();
+time = m[2].trim();
+}
+}
+}
+
+// Fallback: if initial time extraction was too short, try to read full time line
+var timeRaw = parsePrefixedToken(body, /time\s*:/i, /\s*.+/i);
+if (timeRaw && (!time || time.length < 5)) {
+// if raw contains more information (like month names or colon), prefer it
+if (timeRaw.length > (time?time.length:0) && (timeRaw.search(/[:\,A-Za-z]/) != -1)) {
+time = timeRaw;
+}
+}
+
+// If date missing but time begins with a date followed by a comma (e.g. "9 May 2024, 10:00 - 16:00"), split them
+if ((!date || date == '') && time) {
+    // allow commas inside the date part (e.g., "May 9, 2024, 10:00 - 16:00")
+    var m = time.match(/^\s*(.*?\d{4})\s*,\s*(.*)$/);
+    if (m) {
+        date = m[1].trim();
+        time = m[2].trim();
+    }
+}
+
+// Normalize 'noon' and 'midnight' carefully: "12:30 noon" -> "12:30 pm", standalone "noon" -> "12:00 pm"
+if (time) {
+    time = time.replace(/(\d{1,2}:\d{2})\s*noon/ig, '$1 pm')
+    .replace(/\bnoon\b/ig, '12:00 pm')
+    .replace(/(\d{1,2}:\d{2})\s*midnight/ig, '$1 am')
+    .replace(/\bmidnight\b/ig, '12:00 am');
+    // collapse multiple spaces
+    time = time.replaceAll(/\s+/g, ' ').trim();
+}
+
+var times = normalizeTimeInterval(time);
+
+// attempt to parse time
+var startTimeObj = parseTime(times.start);
+if (startTimeObj != null) {
+times.start = Utilities.formatDate(startTimeObj, 'GMT', TIME_FORMAT);
+}
+var endTimeObj = parseTime(times.end);
+if (endTimeObj != null) {
+times.end = Utilities.formatDate(endTimeObj, 'GMT', TIME_FORMAT);
+}
+
+if (startTimeObj == null || (times.end && endTimeObj == null)) {
+error += 'Error: Unrecognized time format. Please re-write in ' + TIME_FORMAT + ' format.\n';
+}
+
+// attempt to parse date here
+var dateObj = parseDate(normalizeDate(date));
+if (dateObj != null) {
+date = Utilities.formatDate(dateObj, 'GMT', DATE_FORMAT);
+} else {
+// add note that date failed to parse)
+error += 'Error: Unrecognized date format. Please re-write in ' + DATE_FORMAT + ' format.\n';
+}
+
+return {
+date: date, times: times, error: error
+}
+}
+
