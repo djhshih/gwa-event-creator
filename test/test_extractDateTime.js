@@ -102,7 +102,6 @@ function runTest(name, fn) {
 	}
 }
 
-// Test 1: simple ISO date and short time range
 runTest("ISO date and short time range", () => {
 	const body = `Title: X\nDate: 2026-03-20\nTime: 4-5pm\n`;
 	const res = context.extractDateTime(body);
@@ -113,7 +112,6 @@ runTest("ISO date and short time range", () => {
 		throw new Error("unexpected error: " + res.error);
 });
 
-// Test 2: verbose date and time with 'to'
 runTest("Verbose date and time with to", () => {
 	const body = `Date: March 21 2026\nTime: 9:30am to 11:00 am\n`;
 	const res = context.extractDateTime(body);
@@ -122,7 +120,6 @@ runTest("Verbose date and time with to", () => {
 	assertEquals(res.times.end, "11:00 AM", "end time");
 });
 
-// Test 3: invalid date
 runTest("Invalid date reports error", () => {
 	const body = `Date: March 32 2026\nTime: 4pm-5pm\n`;
 	const res = context.extractDateTime(body);
@@ -132,14 +129,12 @@ runTest("Invalid date reports error", () => {
 		throw new Error("date normalized unexpectedly: " + res.date);
 });
 
-// Test 4: invalid time
 runTest("Invalid time reports error", () => {
 	const body = `Date: 2026-03-20\nTime: 25pm-26pm\n`;
 	const res = context.extractDateTime(body);
 	assertContains(res.error, "Unrecognized time format", "time error");
 });
 
-// New: combined Date and Time in single line with parentheses
 runTest("Combined date and time with parentheses (noon variants)", () => {
 	const body = `Date and Time: 16 April 2026 (Thu) (10:30 a.m. to 12:30 noon)\n`;
 	const res = context.extractDateTime(body);
@@ -148,7 +143,6 @@ runTest("Combined date and time with parentheses (noon variants)", () => {
 	assertEquals(res.times.end, "12:30 PM", "end time");
 });
 
-// New: date with inline time
 runTest("Date with inline time", () => {
 	const body = `Date: 16 Jan 2026 10:30 - 11:30 am\n`;
 	const res = context.extractDateTime(body);
@@ -157,7 +151,6 @@ runTest("Date with inline time", () => {
 	assertEquals(res.times.end, "11:30 AM", "end time");
 });
 
-// New: time field contains a date then time
 runTest("Time field contains date and 24h range", () => {
 	const body = `Time: May 9, 2024, 10:00 - 16:00\n`;
 	const res = context.extractDateTime(body);
