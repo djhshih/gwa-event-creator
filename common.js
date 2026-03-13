@@ -1,7 +1,7 @@
 const DATE_FORMAT = 'yyyy-MM-dd';
 const TIME_FORMAT = 'h:mm a';
 
-/**
+/*
 interface CalendarEvent {
 	title: string,
 	date: string,
@@ -15,10 +15,10 @@ interface CalendarEvent {
 */
 
 function newCalendarEvent(
-	title: string, date: string, timeZone: string,
-	startTime: string, endTime: string,
-	location: string , description: string,
-	error: string
+	title, date, timeZone,
+	startTime, endTime,
+	location, description,
+	error
 ) {
 	return {
 		title: title,

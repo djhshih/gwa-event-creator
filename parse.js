@@ -1,12 +1,17 @@
+/*
 interface Interval {
 	start: string,
 	end: string
 }
+*/
 
 /**
  * Return string after eating token in string.
+ * @param s        string
+ * @param token    RegExp object
+ * @param tokenEnd RegExp object
  **/
-function eatToken(s: string, token: RegExp, tokenEnd: string) {
+function eatToken(s, token, tokenEnd) {
 	var i = s.search(token);
 	if (i == -1) {
 		return s;
@@ -17,8 +22,11 @@ function eatToken(s: string, token: RegExp, tokenEnd: string) {
 
 /**
  * Return parsed token after prefix in string.
+ * @param s       string
+ * @param prefix  RegExp object
+ * @param token   RegExp object
  **/
-export function parsePrefixedToken(s: string, prefix: RegExp, token: RegExp) {
+function parsePrefixedToken(s, prefix, token) {
 	var m1 = prefix.exec(s);
 	if (m1 == null) {
 		return '';
@@ -31,7 +39,10 @@ export function parsePrefixedToken(s: string, prefix: RegExp, token: RegExp) {
 	return m2[0].trim();
 }
 
-function isWhitespace(c: string) {
+/**
+ * @param c string
+ */
+function isWhitespace(c) {
 	return c === ' '
 		|| c === '\n'
 		|| c === '\t'
@@ -52,8 +63,10 @@ function isWhitespace(c: string) {
 
 /**
  * Return paragraph after prefix in string.
+ * @param s       string
+ * @param prefix  RegExp object
  **/
-export function parsePrefixedParagraph(s: string, prefix: RegExp) {
+function parsePrefixedParagraph(s, prefix) {
 	var m = prefix.exec(s);
 	if (m == null) {
 		return '';
@@ -67,7 +80,10 @@ export function parsePrefixedParagraph(s: string, prefix: RegExp) {
 	return s.substring(start, end);
 }
 
-function parseTimeInterval(time: string): Interval {
+/**
+ * Parse time string and return Interval object.
+ */
+function parseTimeInterval(time) {
 
 	// Utilities.parseDate cannot handle 'a.m.' and 'p.m.',
 	// so remove the '.'
@@ -120,7 +136,11 @@ function parseTimeInterval(time: string): Interval {
 	return {start: startTime, end: endTime};
 }
 
-function normalizeDate(date: string): string {
+/**
+ * @param date  string
+ * @return string
+ */
+function normalizeDate(date) {
 	// remove 'st', 'nd, 'rd, and 'th' from numbers
 	date = date.replace(/(\d+)(st|nd|rd|th)/, '$1');
 
@@ -133,7 +153,11 @@ function normalizeDate(date: string): string {
 	return date;
 }
 
-function parseDate(date: string): Date {
+/**
+ * @param date  string
+ * @return Date object
+ */
+function parseDate(date) {
 	var y = null;
 	var formats = ['yyyy-MM-dd', 'd MMM yyyy', 'MMM d yyyy'];
 	var parsed = false;
@@ -152,7 +176,7 @@ function parseDate(date: string): Date {
 /**
  * Normalize time string.
  */
-function normalizeTime(time: string): string {
+function normalizeTime(time) {
 
 	var i;
 
@@ -180,7 +204,11 @@ function normalizeTime(time: string): string {
 	return time;
 }
 
-function parseTime(time: string): Date {
+/**
+ * @param time  string
+ * @return Date object
+ */
+function parseTime(time) {
 	var y = null;
 	var formats = ['h:mm a', 'HH:mm'];
 	var parsed = false;
@@ -196,7 +224,12 @@ function parseTime(time: string): Date {
 	return y;
 }
 
-function endOf(s: string, token: string, start: number) {
+/**
+ * @param s      string
+ * @param token  string
+ * @param start  number
+ */
+function endOf(s, token, start) {
 	var i = s.indexOf(token, start);
 	if (i == -1) {
 		return s.length;
