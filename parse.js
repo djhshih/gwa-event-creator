@@ -187,7 +187,7 @@ function normalizeTime(time) {
 
 	var i;
 
-	// Insert space between time and am/pm suffix
+	// insert space between time and am/pm suffix
 	i = time.search(/(a|p).?m.?/i);
 	if (i > 0) {
 		if (time[i - 1] != " ") {
@@ -196,7 +196,7 @@ function normalizeTime(time) {
 		}
 	}
 
-	// Add minutes if omitted
+	// add minutes if omitted
 	i = time.search(/:\d+/);
 	if (i == -1) {
 		var j = time.indexOf(" ");
@@ -207,6 +207,14 @@ function normalizeTime(time) {
 			time += ":00";
 		}
 	}
+
+	// normalize 'noon' and 'midnight' carefully:
+	// "12:30 noon" -> "12:30 pm", standalone "noon" -> "12:00 pm"
+	time = time
+		.replace(/(\d{1,2}:\d{2})\s*noon/gi, "$1 pm")
+		.replace(/\bnoon\b/gi, "12:00 pm")
+		.replace(/(\d{1,2}:\d{2})\s*midnight/gi, "$1 am")
+		.replace(/\bmidnight\b/gi, "12:00 am");
 
 	return time;
 }
@@ -323,21 +331,24 @@ function extractDateTime(body) {
 	var date = parsePrefixedToken(body, /date\s*:/i, /\s*.+/i);
 	var time = parsePrefixedToken(body, /time\s*:/i, /\s*.+/i);
 
+	// collapse multiple spaces
+	date = date.replace(/\s+/g, " ").trim();
+	time = time.replace(/\s+/g, " ").trim();
+
 	// If there's a combined "Date and Time:" field and date is empty, use it
-	if (
-		(!date || date == "") &&
-		parsePrefixedToken(body, /date and time\s*:/i, /\s*.+/)
-	) {
-		var dtCombined = parsePrefixedToken(body, /date and time\s*:/i, /\s*.+/);
-		// extract any parenthesized time, e.g. (10:30 a.m. to 12:30 noon)
-		var parens = dtCombined.match(/\([^)]*\)/g);
-		if (parens) {
-			for (var i = 0; i < parens.length; ++i) {
-				var grp = parens[i].replace(/[()]/g, "").trim();
-				if (grp.search(/\d|am|pm|noon|midnight|to|-/i) != -1) {
-					time = grp;
-					dtCombined = dtCombined.replace(parens[i], "");
-					break;
+	if (date == "") {
+		var dtCombined = parsePrefixedToken(body, /date (and|&) time\s*:/i, /\s*.+/);
+		if (dtCombined != "") {
+			// extract any parenthesized time, e.g. (10:30 a.m. to 12:30 noon)
+			var parens = dtCombined.match(/\([^)]*\)/g);
+			if (parens) {
+				for (var i = 0; i < parens.length; ++i) {
+					var grp = parens[i].replace(/[()]/g, "").trim();
+					if (grp.search(/\d|am|pm|noon|midnight|to|-/i) != -1) {
+						time = grp;
+						dtCombined = dtCombined.replace(parens[i], "");
+						break;
+					}
 				}
 			}
 		}
@@ -346,8 +357,8 @@ function extractDateTime(body) {
 		date = dtCombined.replace(/\(.*\)/g, "").trim();
 	}
 
-	// If time field is empty but date contains parenthesized or trailing time, extract it
-	if ((!time || time == "") && date) {
+	// if time is empty, try to extract time from date field
+	if (time == "" && date) {
 		var parens = date.match(/\([^)]*\)/g);
 		if (parens) {
 			for (var i = 0; i < parens.length; ++i) {
@@ -359,12 +370,9 @@ function extractDateTime(body) {
 				}
 			}
 		}
-		// also handle date lines that include trailing time, e.g. "16 Jan 2026 10:30 - 11:30 am"
-		if (
-			(!time || time == "") &&
-			date.search(/\d:\d|am|pm|noon|midnight|to|-/i) != -1
-		) {
-			var m = date.match(/(.*?)(\d{1,2}:\d{2}[\s\S]*)$/);
+		// if time is still empty, try to extract trailing time
+		if (time == "") {
+			var m = date.match(/(.*)(\d{1,2}:?\d{2}?.*)$/);
 			if (m) {
 				date = m[1].trim();
 				time = m[2].trim();
@@ -372,37 +380,14 @@ function extractDateTime(body) {
 		}
 	}
 
-	// Fallback: if initial time extraction was too short, try to read full time line
-	var timeRaw = parsePrefixedToken(body, /time\s*:/i, /\s*.+/i);
-	if (timeRaw && (!time || time.length < 5)) {
-		// if raw contains more information (like month names or colon), prefer it
-		if (
-			timeRaw.length > (time ? time.length : 0) &&
-			timeRaw.search(/[:\,A-Za-z]/) != -1
-		) {
-			time = timeRaw;
-		}
-	}
-
-	// If date missing but time begins with a date followed by a comma (e.g. "9 May 2024, 10:00 - 16:00"), split them
+	// if date is empty, try to extract date from time field
 	if ((!date || date == "") && time) {
 		// allow commas inside the date part (e.g., "May 9, 2024, 10:00 - 16:00")
-		var m = time.match(/^\s*(.*?\d{4})\s*,\s*(.*)$/);
+		var m = time.match(/^\s*(.*?\d{4})\s*,?\s*(.*)$/);
 		if (m) {
 			date = m[1].trim();
 			time = m[2].trim();
 		}
-	}
-
-	// Normalize 'noon' and 'midnight' carefully: "12:30 noon" -> "12:30 pm", standalone "noon" -> "12:00 pm"
-	if (time) {
-		time = time
-			.replace(/(\d{1,2}:\d{2})\s*noon/gi, "$1 pm")
-			.replace(/\bnoon\b/gi, "12:00 pm")
-			.replace(/(\d{1,2}:\d{2})\s*midnight/gi, "$1 am")
-			.replace(/\bmidnight\b/gi, "12:00 am");
-		// collapse multiple spaces
-		time = time.replaceAll(/\s+/g, " ").trim();
 	}
 
 	var times = normalizeTimeInterval(time);
