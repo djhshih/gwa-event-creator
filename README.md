@@ -8,22 +8,38 @@ A Google Workspace add-on for creating Google calendar events.
 
 2. Install [clasp][3].
 
-3. Login and clone the project into a separate directory.
-   Script ID is found under Project Settings on App Script.
+3. Login with `clasp`.
 
 ```
 clasp login
-clasp clone <Script ID>
 ```
 
-Move the project settings file `.clasp.json` to this git repo.
+4. Determine the Script ID of your Apps Script project, which
+   is found under Project Settings.
+   Clone the project into a separate directory.
+
+   ```
+   clasp clone <Script ID>
+   ```
+
+   Move the project settings file `.clasp.json` to this git repo.
+
+   Alternatively, you can modify the existing `.clasp.json` with your 
+   own Script ID:
+   ```
+   {
+     "scriptId": "",
+     ...
+   }
+   ```
 
 4. Then, you can push this Apps Script project with by
-```
-clasp push
-```
 
-Finally, on the [Apps Script][2] portal, install a test deployment for your Apps Script project.
+   ```
+   clasp push
+   ```
+
+5. On the [Apps Script][2] portal, install a test deployment for your Apps Script project.
 
 ## Usage
 
