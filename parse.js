@@ -279,7 +279,8 @@ function parseBody(body) {
 	}
 
 	return {
-		title: title, date: date, times: times, location: location,
+		title: title, date: date, times: times,
+		location: location,
 		description: description, error: error
 	}
 }

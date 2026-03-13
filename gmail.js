@@ -21,13 +21,11 @@ function onGmailMessage(e) {
 	var timeZone = CalendarApp.getTimeZone();
 
 	var p = parseBody(message.getPlainBody());
-	if (p.title == '') {
-		p.title = subject;
-	}
 
 	return createCard(
 		newCalendarEvent(
-			p.title, p.date, timeZone, p.times.start, p.times.end, p.location, p.description, p.error
+			p.title == '' ? subject : p.title,
+			p.date, timeZone, p.times.start, p.times.end, p.location, p.description, p.error
 		)
 	);
 }

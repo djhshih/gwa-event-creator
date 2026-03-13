@@ -1,6 +1,7 @@
 const DATE_FORMAT = 'yyyy-MM-dd';
 const TIME_FORMAT = 'h:mm a';
 
+/**
 interface CalendarEvent {
 	title: string,
 	date: string,
@@ -11,6 +12,7 @@ interface CalendarEvent {
 	description: string,
 	error: string
 }
+*/
 
 function newCalendarEvent(
 	title: string, date: string, timeZone: string,
@@ -47,9 +49,10 @@ function onHomepage(e) {
 
 /**
  * Callback for creating a card to add an event
+ * @param e  calendar event
  * @return {CardService.Card}
  */
-function createCard(e: CalendarEvent) {
+function createCard(e) {
 	var errorText = CardService.newTextParagraph()
 		.setText(`<font color="#FF0000">${e.error}</font>`);
 
