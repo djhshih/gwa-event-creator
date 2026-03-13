@@ -88,10 +88,6 @@ function parsePrefixedParagraph(s, prefix) {
  * @return { startTime, endTime }
  */
 function normalizeTimeInterval(time) {
-	// Utilities.parseDate cannot handle 'a.m.' and 'p.m.',
-	// so remove the '.'
-	time = time.replaceAll(".", "");
-
 	// split time string into start and end times
 	var startTime;
 	var endTime;
@@ -121,7 +117,7 @@ function normalizeTimeInterval(time) {
 
 	var suffix = /(a|p).?m.?/i;
 
-	// infer am/pm of start time if it is missing
+	// infer am/pm of start time from end time
 	if (startTime.search(suffix) == -1) {
 		j = endTime.search(suffix);
 		if (j != -1) {
@@ -215,6 +211,10 @@ function normalizeTime(time) {
 		.replace(/\bnoon\b/gi, "12:00 pm")
 		.replace(/(\d{1,2}:\d{2})\s*midnight/gi, "$1 am")
 		.replace(/\bmidnight\b/gi, "12:00 am");
+
+	// Utilities.parseDate cannot handle 'a.m.' and 'p.m.',
+	// so remove all '.'
+	time = time.replaceAll(".", "");
 
 	return time;
 }
@@ -372,7 +372,8 @@ function extractDateTime(body) {
 		}
 		// if time is still empty, try to extract trailing time
 		if (time == "") {
-			var m = date.match(/(.*)(\d{1,2}:?\d{2}?.*)$/);
+			// .*? is a non-greedy match for smallest possible string
+			var m = date.match(/(.*?)(\d{1,2}:\d{2}.*)$/);
 			if (m) {
 				date = m[1].trim();
 				time = m[2].trim();
@@ -382,7 +383,7 @@ function extractDateTime(body) {
 
 	// if date is empty, try to extract date from time field
 	if ((!date || date == "") && time) {
-		// allow commas inside the date part (e.g., "May 9, 2024, 10:00 - 16:00")
+		// use 4-digit year to separate date and time
 		var m = time.match(/^\s*(.*?\d{4})\s*,?\s*(.*)$/);
 		if (m) {
 			date = m[1].trim();
