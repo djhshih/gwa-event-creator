@@ -83,7 +83,7 @@ function parsePrefixedParagraph(s, prefix) {
 /**
  * Normalize time string and return Interval object.
  * @param time  string
- * @return string
+ * @return { startTime, endTime }
  */
 function normalizeTimeInterval(time) {
 
@@ -262,24 +262,26 @@ function parseBody(body) {
 
 	var title = parsePrefixedToken(body, /title\s*:/i, /\s*.+/);
 
-	// remove any parenthesized value (e.g. day of week)
-	var date = parsePrefixedToken(body, /date\s*:/i, /\s*[0-9A-Za-z ,./]+/i);
-	var time = parsePrefixedToken(body,
-		/time\s*:/i,
-		/\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?\s*(-|–|(to))?\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?/i
-	);
-
 	var location = parsePrefixedToken(body, /venue\s*:/i, /\s*.+/);
 	if (location == '') {
 		location = parsePrefixedToken(body, /location\s*:/i, /\s*.+/);
 	}
 
-	var error = '';
-	var description = '';
-	var startTime = '';
-	var endTime = '';
+	var description = extractDescription(body);
+	var dt = extractDateTime(body);
 
-	var i;
+	return {
+		title: title, date: dt.date, times: dt.times,
+		location: location,
+		description: description, error: dt.error
+	}
+}
+
+/**
+ * Extract speaker description, if any
+ */
+function extractDescription(body) {
+	var description = '';
 
 	var biography = parsePrefixedParagraph(body, /^ *biography:?\s*$/im);
 	if (biography == '') {
@@ -299,9 +301,24 @@ function parseBody(body) {
 		description += 'Abstract:\n' + abstract + '\n\n';
 	}
 
-	var times = normalizeTimeInterval(time);
+	return description;
+}
 
-	// parse time and date and output in standardized string format
+/**
+ * Parse time and date and output in standardized string format
+ * @param body   string
+ * @param error  string for logging errors
+ */
+function extractDateTime(body) {
+	var error = '';
+
+	var date = parsePrefixedToken(body, /date\s*:/i, /\s*[0-9A-Za-z ,./]+/i);
+	var time = parsePrefixedToken(body,
+		/time\s*:/i,
+		/\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?\s*(-|–|(to))?\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?/i
+	);
+
+	var times = normalizeTimeInterval(time);
 
 	// attempt to parse time
 	var startTimeObj = parseTime(times.start);
@@ -327,8 +344,6 @@ function parseBody(body) {
 	}
 
 	return {
-		title: title, date: date, times: times,
-		location: location,
-		description: description, error: error
+		date: date, times: times, error: error
 	}
 }
