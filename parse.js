@@ -259,7 +259,7 @@ function parseBody(body) {
 	body = eatToken(body, /Subject: /, '\n');
 
 	// Remove return characters, which makes \n\n detection difficult
-	body = body.replaceAll('r', '');
+	body = body.replaceAll('\r', '');
 
 	var title = parsePrefixedToken(body, /title\s*:/i, /\s*.+/);
 
