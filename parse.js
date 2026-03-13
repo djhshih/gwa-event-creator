@@ -312,7 +312,7 @@ function extractDescription(body) {
 function extractDateTime(body) {
 	var error = '';
 
-	var date = parsePrefixedToken(body, /date\s*:/i, /\s*[0-9A-Za-z ,./]+/i);
+	var date = parsePrefixedToken(body, /date\s*:/i, /\s*[0-9A-Za-z \,.\/\-]+/i);
 	var time = parsePrefixedToken(body,
 		/time\s*:/i,
 		/\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?\s*(-|–|(to))?\s*[0-9]+(:[0-9]+)?\s*((a|p)\.?m\.?)?/i
