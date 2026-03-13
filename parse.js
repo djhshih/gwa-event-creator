@@ -82,12 +82,14 @@ function parsePrefixedParagraph(s, prefix) {
 
 /**
  * Parse time string and return Interval object.
+ * @param time  string
+ * @return string
  */
 function parseTimeInterval(time) {
 
 	// Utilities.parseDate cannot handle 'a.m.' and 'p.m.',
 	// so remove the '.'
-	time = time.replace(/\./g, '');
+	time = time.replaceAll('.', '');
 
 	// split time string into start and end times
 	var startTime;
@@ -142,13 +144,15 @@ function parseTimeInterval(time) {
  */
 function normalizeDate(date) {
 	// remove 'st', 'nd, 'rd, and 'th' from numbers
-	date = date.replace(/(\d+)(st|nd|rd|th)/, '$1');
+	date = date.replace(/(\d+)(st|nd|rd|th)/g, '$1');
 
-	// remove commas
-	date = date.replace(/,/, '');
+	// remove commas and parentheses
+	date = date.replaceAll(',', '')
+		.replaceAll('(', '').replaceAll(')', '')
+		.replaceAll('[', '').replaceAll(']', '')
 
 	// remove day of week
-	date = date.replace(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s*/i, '');
+	date = date.replace(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s*/ig, '');
 
 	return date;
 }
@@ -255,7 +259,7 @@ function parseBody(body) {
 	body = eatToken(body, /Subject: /, '\n');
 
 	// Remove return characters, which makes \n\n detection difficult
-	body = body.replace(/\r/g, '');
+	body = body.replaceAll('r', '');
 
 	var title = parsePrefixedToken(body, /title\s*:/i, /\s*.+/);
 
@@ -298,6 +302,8 @@ function parseBody(body) {
 
 	var times = parseTimeInterval(time);
 
+	// parse time and date and output in standardized string format
+
 	// attempt to parse time
 	var startTimeObj = parseTime(times.start);
 	if (startTimeObj != null) {
@@ -312,12 +318,9 @@ function parseBody(body) {
 		error += 'Error: Unrecognized time format. Please re-write in ' + TIME_FORMAT + ' format.\n';
 	}
 
-	date = normalizeDate(date);
-
 	// attempt to parse date here
-	var dateObj = parseDate(date);
+	var dateObj = parseDate(normalizeDate(date));
 	if (dateObj != null) {
-		// standardize format
 		date = Utilities.formatDate(dateObj, 'GMT', DATE_FORMAT);
 	} else {
 		// add note that date failed to parse)
