@@ -81,7 +81,7 @@ function parsePrefixedParagraph(s, prefix) {
 }
 
 /**
- * Parse time string and return Interval object.
+ * Normalize time string and return Interval object.
  * @param time  string
  * @return string
  */
@@ -181,6 +181,9 @@ function parseDate(date) {
  * Normalize time string.
  */
 function normalizeTime(time) {
+	if (time == '') {
+		return time;
+	}
 
 	var i;
 
@@ -300,7 +303,7 @@ function parseBody(body) {
 		description += 'Abstract:\n' + abstract + '\n\n';
 	}
 
-	var times = parseTimeInterval(time);
+	var times = normalizeTimeInterval(time);
 
 	// parse time and date and output in standardized string format
 
