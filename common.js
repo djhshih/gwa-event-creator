@@ -139,7 +139,7 @@ function doAddEvent(e) {
 	var startTime = combineDateTime(
 		date, Utilities.parseDate(e.formInput.startTime, timeZone, TIME_FORMAT)
 	);
-	if (e.formInput.endTime != "") {
+	if (e.formInput.endTime) {
 		var endTime = combineDateTime(
 			date, Utilities.parseDate(e.formInput.endTime, timeZone, TIME_FORMAT)
 		);

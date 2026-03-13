@@ -129,11 +129,7 @@ function normalizeTimeInterval(time) {
 	}
 
 	startTime = normalizeTime(startTime);
-	if (endTime == '') {
-		endTime = startTime;
-	} else {
-		endTime = normalizeTime(endTime);
-	}
+	endTime = normalizeTime(endTime);
 
 	return {start: startTime, end: endTime};
 }
@@ -317,7 +313,7 @@ function parseBody(body) {
 		times.end = Utilities.formatDate(endTimeObj, 'GMT', TIME_FORMAT);
 	}
 
-	if (startTimeObj == null || endTimeObj == null) {
+	if (startTimeObj == null || (times.end && endTimeObj == null)) {
 		error += 'Error: Unrecognized time format. Please re-write in ' + TIME_FORMAT + ' format.\n';
 	}
 
