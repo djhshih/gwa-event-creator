@@ -1,5 +1,5 @@
-const DATE_FORMAT = 'yyyy-MM-dd';
-const TIME_FORMAT = 'h:mm a';
+const DATE_FORMAT = "yyyy-MM-dd";
+const TIME_FORMAT = "h:mm a";
 
 /*
 interface CalendarEvent {
@@ -15,10 +15,14 @@ interface CalendarEvent {
 */
 
 function newCalendarEvent(
-	title, date, timeZone,
-	startTime, endTime,
-	location, description,
-	error
+	title,
+	date,
+	timeZone,
+	startTime,
+	endTime,
+	location,
+	description,
+	error,
 ) {
 	return {
 		title: title,
@@ -28,7 +32,7 @@ function newCalendarEvent(
 		endTime: endTime,
 		location: location,
 		description: description,
-		error: error
+		error: error,
 	};
 }
 
@@ -37,13 +41,11 @@ function newCalendarEvent(
  * @return {CardService.Card}
  */
 function onHomepage(e) {
-	var introText = CardService.newTextParagraph()
-		.setText('Open a message to add an event.');
-	var section = CardService.newCardSection()
-		.addWidget(introText);
-	var card = CardService.newCardBuilder()
-		.addSection(section)
-		.build();
+	var introText = CardService.newTextParagraph().setText(
+		"Open a message to add an event.",
+	);
+	var section = CardService.newCardSection().addWidget(introText);
+	var card = CardService.newCardBuilder().addSection(section).build();
 	return card;
 }
 
@@ -53,49 +55,49 @@ function onHomepage(e) {
  * @return {CardService.Card}
  */
 function createCard(e) {
-	var errorText = CardService.newTextParagraph()
-		.setText(`<font color="#FF0000">${e.error}</font>`);
+	var errorText = CardService.newTextParagraph().setText(
+		`<font color="#FF0000">${e.error}</font>`,
+	);
 
 	var titleText = CardService.newTextInput()
-		.setFieldName('title')
-		.setTitle('Title')
+		.setFieldName("title")
+		.setTitle("Title")
 		.setValue(e.title);
 
 	var dateText = CardService.newTextInput()
-		.setFieldName('date')
-		.setTitle('Date')
+		.setFieldName("date")
+		.setTitle("Date")
 		.setValue(e.date);
 
 	var timeZoneText = CardService.newTextInput()
-		.setFieldName('timeZone')
-		.setTitle('Time Zone')
+		.setFieldName("timeZone")
+		.setTitle("Time Zone")
 		.setValue(e.timeZone);
 
 	var startText = CardService.newTextInput()
-		.setFieldName('startTime')
-		.setTitle('Start')
+		.setFieldName("startTime")
+		.setTitle("Start")
 		.setValue(e.startTime);
 
 	var endText = CardService.newTextInput()
-		.setFieldName('endTime')
-		.setTitle('End')
+		.setFieldName("endTime")
+		.setTitle("End")
 		.setValue(e.endTime);
 
 	var locationText = CardService.newTextInput()
-		.setFieldName('location')
-		.setTitle('Location')
+		.setFieldName("location")
+		.setTitle("Location")
 		.setValue(e.location);
 
-	var descriptionText = CardService.newTextParagraph()
-		.setText(e.description);
+	var descriptionText = CardService.newTextParagraph().setText(e.description);
 
 	// Create a button for adding event
 	// Note: Action parameter keys and values must be strings.
 	var action = CardService.newAction()
-		.setFunctionName('doAddEvent')
-		.setParameters({description: e.description});
+		.setFunctionName("doAddEvent")
+		.setParameters({ description: e.description });
 	var addButton = CardService.newTextButton()
-		.setText('Add')
+		.setText("Add")
 		.setOnClickAction(action)
 		.setTextButtonStyle(CardService.TextButtonStyle.FILLED);
 
@@ -111,14 +113,13 @@ function createCard(e) {
 		.addWidget(descriptionText);
 
 	// Add button to footer
-	var footer = CardService.newFixedFooter()
-		.setPrimaryButton(addButton);
+	var footer = CardService.newFixedFooter().setPrimaryButton(addButton);
 
 	// Create the header shown when the card is minimized,
 	// but only when this card is a contextual card. Peek headers
 	// are never used by non-contexual cards like homepages.
 	var peekHeader = CardService.newCardHeader()
-		.setTitle('Event')
+		.setTitle("Event")
 		.setSubtitle(e.title);
 
 	var builder = CardService.newCardBuilder()
@@ -137,11 +138,13 @@ function doAddEvent(e) {
 
 	var timeZone = e.formInput.timeZone;
 	var startTime = combineDateTime(
-		date, Utilities.parseDate(e.formInput.startTime, timeZone, TIME_FORMAT)
+		date,
+		Utilities.parseDate(e.formInput.startTime, timeZone, TIME_FORMAT),
 	);
 	if (e.formInput.endTime) {
 		var endTime = combineDateTime(
-			date, Utilities.parseDate(e.formInput.endTime, timeZone, TIME_FORMAT)
+			date,
+			Utilities.parseDate(e.formInput.endTime, timeZone, TIME_FORMAT),
 		);
 	} else {
 		endTime = new Date(startTime);
@@ -152,26 +155,18 @@ function doAddEvent(e) {
 
 	// create event
 	var calendar = CalendarApp.getDefaultCalendar();
-	var event = calendar.createEvent(
-		title,
-		startTime,
-		endTime,
-		{
-			location: location,
-			description: description
-		}
+	var event = calendar.createEvent(title, startTime, endTime, {
+		location: location,
+		description: description,
+	});
+
+	var section = CardService.newCardSection().addWidget(
+		CardService.newTextParagraph().setText(
+			"Event added to calendar: " + calendar.getId(),
+		),
 	);
 
-	var section = CardService.newCardSection()
-		.addWidget(
-			CardService.newTextParagraph().setText(
-				'Event added to calendar: ' + calendar.getId()
-			)
-		);
-
-	var card = CardService.newCardBuilder()
-		.addSection(section)
-		.build();
+	var card = CardService.newCardBuilder().addSection(section).build();
 
 	return card;
 }

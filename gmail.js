@@ -4,7 +4,7 @@
  */
 function onGmailMessage(e) {
 	var messageId = e.gmail.messageId;
-	
+
 	// Get access token and use it for GmailApp calls
 	var accessToken = e.gmail.accessToken;
 	GmailApp.setCurrentMessageAccessToken(accessToken);
@@ -14,9 +14,10 @@ function onGmailMessage(e) {
 	// Get message subject
 	// stripping 'Re:', 'Fw:', or similar prefix
 	// and anything enclosed in []
-	var subject = message.getSubject()
-			.replace(/^(re)|(fwd?)\:\s*/i, '')
-			.replace(/^\[.*?\]\s*/, '');
+	var subject = message
+		.getSubject()
+		.replace(/^(re)|(fwd?)\:\s*/i, "")
+		.replace(/^\[.*?\]\s*/, "");
 
 	var timeZone = CalendarApp.getTimeZone();
 
@@ -24,9 +25,14 @@ function onGmailMessage(e) {
 
 	return createCard(
 		newCalendarEvent(
-			p.title == '' ? subject : p.title,
-			p.date, timeZone, p.times.start, p.times.end, p.location, p.description, p.error
-		)
+			p.title == "" ? subject : p.title,
+			p.date,
+			timeZone,
+			p.times.start,
+			p.times.end,
+			p.location,
+			p.description,
+			p.error,
+		),
 	);
 }
-
