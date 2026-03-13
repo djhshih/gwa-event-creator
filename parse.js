@@ -139,13 +139,11 @@ function normalizeDate(date) {
 	// remove 'st', 'nd, 'rd, and 'th' from numbers
 	date = date.replace(/(\d+)(st|nd|rd|th)/g, "$1");
 
-	// remove commas and parentheses
+	// remove commas and parenthesized elements
 	date = date
 		.replaceAll(",", "")
-		.replaceAll("(", "")
-		.replaceAll(")", "")
-		.replaceAll("[", "")
-		.replaceAll("]", "");
+		.replace(/\(.*?\)/, "")
+		.replace(/\[.*?\]/, "")
 
 	// remove day of week
 	date = date.replace(/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s*/gi, "");
@@ -328,34 +326,12 @@ function extractDateTime(body) {
 	var error = "";
 
 	// initial extraction: date and time fields (time uses a permissive matcher)
-	var date = parsePrefixedToken(body, /date\s*:/i, /\s*.+/i);
-	var time = parsePrefixedToken(body, /time\s*:/i, /\s*.+/i);
+	var date = parsePrefixedToken(body, /date(\s(and|&)\stime)?\s*:/i, /\s*.+/i);
+	var time = parsePrefixedToken(body, /time(\s(and|&)\sdate)?\s*:/i, /\s*.+/i);
 
 	// collapse multiple spaces
 	date = date.replace(/\s+/g, " ").trim();
 	time = time.replace(/\s+/g, " ").trim();
-
-	// If there's a combined "Date and Time:" field and date is empty, use it
-	if (date == "") {
-		var dtCombined = parsePrefixedToken(body, /date (and|&) time\s*:/i, /\s*.+/);
-		if (dtCombined != "") {
-			// extract any parenthesized time, e.g. (10:30 a.m. to 12:30 noon)
-			var parens = dtCombined.match(/\([^)]*\)/g);
-			if (parens) {
-				for (var i = 0; i < parens.length; ++i) {
-					var grp = parens[i].replace(/[()]/g, "").trim();
-					if (grp.search(/\d|am|pm|noon|midnight|to|-/i) != -1) {
-						time = grp;
-						dtCombined = dtCombined.replace(parens[i], "");
-						break;
-					}
-				}
-			}
-		}
-		// leftover string is date
-		dtCombined = dtCombined.replaceAll(/\s+/g, " ").trim();
-		date = dtCombined.replace(/\(.*\)/g, "").trim();
-	}
 
 	// if time is empty, try to extract time from date field
 	if (time == "" && date) {
@@ -363,9 +339,8 @@ function extractDateTime(body) {
 		if (parens) {
 			for (var i = 0; i < parens.length; ++i) {
 				var grp = parens[i].replace(/[()]/g, "").trim();
-				if (grp.search(/\d|am|pm|noon|midnight|to|-/i) != -1) {
+				if (grp.search(/\d{1,2}:\d{2}/) != -1) {
 					time = grp;
-					date = date.replace(parens[i], "").trim();
 					break;
 				}
 			}
@@ -382,7 +357,7 @@ function extractDateTime(body) {
 	}
 
 	// if date is empty, try to extract date from time field
-	if ((!date || date == "") && time) {
+	if (date == "" && time) {
 		// use 4-digit year to separate date and time
 		var m = time.match(/^\s*(.*?\d{4})\s*,?\s*(.*)$/);
 		if (m) {
