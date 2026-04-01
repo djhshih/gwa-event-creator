@@ -263,7 +263,11 @@ function truncate(str, length = 40) {
 	return str;
 }
 
-function parseBody(body) {
+/**
+ * @param body  string of message body
+ * @param date  date object obtained from email header
+ */
+function parseBody(body, date) {
 	// Remove possible email header
 	body = eatToken(body, /Subject: /, "\n");
 
@@ -278,7 +282,7 @@ function parseBody(body) {
 	}
 
 	var description = extractDescription(body);
-	var dt = extractDateTime(body);
+	var dt = extractDateTime(body, date);
 
 	return {
 		title: title,
@@ -320,9 +324,10 @@ function extractDescription(body) {
 /**
  * Parse time and date and output in standardized string format
  * @param body   string
+ * @param date   date of message
  * @param error  string for logging errors
  */
-function extractDateTime(body) {
+function extractDateTime(body, date) {
 	var error = "";
 
 	// extract date

@@ -21,7 +21,7 @@ function onGmailMessage(e) {
 
 	var timeZone = CalendarApp.getTimeZone();
 
-	var p = parseBody(message.getPlainBody());
+	var p = parseBody(message.getPlainBody(), message.getDate());
 
 	return createCard(
 		newCalendarEvent(
