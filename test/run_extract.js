@@ -1,7 +1,7 @@
 const fs = require("fs");
 const vm = require("vm");
 
-const parseSrc = fs.readFileSync(__dirname + "/parse.js", "utf8");
+const parseSrc = fs.readFileSync(__dirname + "/../parse.js", "utf8");
 
 // Simple Utilities mock implementing parseDate and formatDate
 const Utilities = {
@@ -114,7 +114,11 @@ vm.createContext(context);
 const script = new vm.Script(parseSrc, { filename: "parse.js" });
 script.runInContext(context);
 
+// Create a reference date for testing
+const refDate = new Date(Date.UTC(2024, 4, 9)); // May 9, 2024
+
 // Now call extractDateTime on the given string
 const input = "Time: May 9, 2024, 10:00 - 16:00";
-const result = context.extractDateTime(input);
+const result = context.extractDateTime(input, refDate);
 console.log(JSON.stringify(result, null, 2));
+

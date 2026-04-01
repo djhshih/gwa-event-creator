@@ -327,7 +327,7 @@ function extractDescription(body) {
  * @param date   date of message
  * @param error  string for logging errors
  */
-function extractDateTime(body, date) {
+function extractDateTime(body, messageDate) {
 	var error = "";
 
 	// extract date
@@ -374,6 +374,12 @@ function extractDateTime(body, date) {
 			date = m[1].trim();
 			time = m[2].trim();
 		}
+	}
+
+	// if date doesn't contain a year, append the year from messageDate
+	if (date && !/\d{4}/.test(date) && messageDate) {
+		var year = messageDate.getFullYear();
+		date = date + " " + year;
 	}
 
 	var times = normalizeTimeInterval(time);

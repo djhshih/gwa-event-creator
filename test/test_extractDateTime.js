@@ -102,9 +102,12 @@ function runTest(name, fn) {
 	}
 }
 
+// Create a reference date for 2026-03-20
+const refDate = new Date(Date.UTC(2026, 2, 20));
+
 runTest("ISO date and short time range", () => {
 	const body = `Title: X\nDate: 2026-03-20\nTime: 4-5pm\n`;
-	const res = context.extractDateTime(body);
+	const res = context.extractDateTime(body, refDate);
 	assertEquals(res.date, "2026-03-20", "date");
 	assertEquals(res.times.start, "4:00 PM", "start time");
 	assertEquals(res.times.end, "5:00 PM", "end time");
@@ -114,7 +117,7 @@ runTest("ISO date and short time range", () => {
 
 runTest("Verbose date and time with to", () => {
 	const body = `Date: March 21 2026\nTime: 9:30am to 11:00 am\n`;
-	const res = context.extractDateTime(body);
+	const res = context.extractDateTime(body, refDate);
 	assertEquals(res.date, "2026-03-21", "date");
 	assertEquals(res.times.start, "9:30 AM", "start time");
 	assertEquals(res.times.end, "11:00 AM", "end time");
@@ -122,7 +125,7 @@ runTest("Verbose date and time with to", () => {
 
 runTest("Invalid date reports error", () => {
 	const body = `Date: March 32 2026\nTime: 4pm-5pm\n`;
-	const res = context.extractDateTime(body);
+	const res = context.extractDateTime(body, refDate);
 	assertContains(res.error, "Unrecognized date format", "date error");
 	// date should be returned as original normalized string (not formatted)
 	if (!res.date.includes("March"))
@@ -131,13 +134,13 @@ runTest("Invalid date reports error", () => {
 
 runTest("Invalid time reports error", () => {
 	const body = `Date: 2026-03-20\nTime: 25pm-26pm\n`;
-	const res = context.extractDateTime(body);
+	const res = context.extractDateTime(body, refDate);
 	assertContains(res.error, "Unrecognized time format", "time error");
 });
 
 runTest("Combined date and time with parentheses (noon variants)", () => {
 	const body = `Date and Time: 16 April 2026 (Thu) (10:30 a.m. to 12:30 noon)\n`;
-	const res = context.extractDateTime(body);
+	const res = context.extractDateTime(body, refDate);
 	assertEquals(res.date, "2026-04-16", "date");
 	assertEquals(res.times.start, "10:30 AM", "start time");
 	assertEquals(res.times.end, "12:30 PM", "end time");
@@ -145,7 +148,7 @@ runTest("Combined date and time with parentheses (noon variants)", () => {
 
 runTest("Date with inline time", () => {
 	const body = `Date: 16 Jan 2026 10:30 - 11:30 am\n`;
-	const res = context.extractDateTime(body);
+	const res = context.extractDateTime(body, refDate);
 	assertEquals(res.date, "2026-01-16", "date");
 	assertEquals(res.times.start, "10:30 AM", "start time");
 	assertEquals(res.times.end, "11:30 AM", "end time");
@@ -153,11 +156,20 @@ runTest("Date with inline time", () => {
 
 runTest("Time field contains date and 24h range", () => {
 	const body = `Time: May 9, 2024, 10:00 - 16:00\n`;
-	const res = context.extractDateTime(body);
+	const res = context.extractDateTime(body, refDate);
 	assertEquals(res.date, "2024-05-09", "date");
 	assertEquals(res.times.start, "10:00 AM", "start time");
 	assertEquals(res.times.end, "4:00 PM", "end time");
 });
 
+runTest("Date without year uses message date year", () => {
+	const body = `Date & Time: Apr 1 (Wed), 11:00–12:00\n`;
+	const res = context.extractDateTime(body, refDate);
+	assertEquals(res.date, "2026-04-01", "date");
+	assertEquals(res.times.start, "11:00 AM", "start time");
+	assertEquals(res.times.end, "12:00 PM", "end time");
+});
+
 console.log(`\nTests: ${tests}, Passed: ${passed}, Failed: ${tests - passed}`);
 if (passed !== tests) process.exit(1);
+
